@@ -1,0 +1,55 @@
+---
+title: Errors & rate limits
+description: Every error status you'll see, and how fast you can call the API.
+icon: TriangleAlert
+---
+
+## Error format
+
+Every error response has the same shape:
+
+```json
+{
+  "message": "amount has more precision than XAF supports (0 decimal places)",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+`message` is written to be actionable on its own — you shouldn't need to guess what to
+fix.
+
+## Status codes
+
+| Status | Meaning |
+|---|---|
+| `400` | Validation error — bad amount, unknown currency, more decimal precision than the currency supports, `Idempotency-Key` too long, malformed webhook URL. |
+| `401` | Missing, invalid, or revoked API key. |
+| `403` | Your merchant account isn't approved, the merchant API is temporarily disabled platform-wide, your settlement channel isn't API-enabled yet, or API access to your channel has been specifically restricted. |
+| `404` | The payment reference doesn't exist, or belongs to a different merchant account — both look identical, so you can't use this endpoint to probe whether a reference exists. |
+| `429` | Rate limit hit — see below. |
+
+## Rate limits
+
+Per API key:
+
+<Cards>
+  <Card title="30 requests / minute" description="Short burst window." />
+  <Card title="600 requests / hour" description="Sustained volume window." />
+</Cards>
+
+Exceeding either returns `429` with a message telling you which window you hit:
+
+```json
+{
+  "message": "Rate limit exceeded: 30 requests per minute",
+  "error": "Too Many Requests",
+  "statusCode": 429
+}
+```
+
+<Callout type="info">
+  If you're hitting these limits during normal operation, generate a second API key for a
+  separate integration or environment rather than sharing one key across unrelated
+  traffic — limits are scoped per key, not per merchant account.
+</Callout>

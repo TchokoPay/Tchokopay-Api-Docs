@@ -1,0 +1,66 @@
+---
+title: Introduction
+description: Accept payments from your own backend with the TchokoPay Merchant API.
+icon: House
+---
+
+TchokoPay's Merchant API lets your backend create payments programmatically, redirect
+customers to a hosted checkout page, and get notified the moment a payment resolves —
+without building any payment UI or integrating mobile money yourself.
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="Create your first payment in under five minutes." />
+  <Card title="Authentication" href="/docs/authentication" description="How API keys work and how to keep them safe." />
+  <Card title="API Reference" href="/docs/api-reference" description="Every endpoint, every field, every error." />
+  <Card title="Webhooks" href="/docs/guides/webhooks" description="Get notified instead of polling for status." />
+</Cards>
+
+## How it works
+
+<Steps>
+<Step>
+### Create a payment
+
+`POST /v1/payments` with an amount, a currency, and a description. You get back a
+`checkoutUrl`.
+</Step>
+<Step>
+### Redirect your customer
+
+Send them to `checkoutUrl`. They pick MTN MoMo, Orange Money, card, or Bitcoin/Lightning
+(where available) and complete the payment on TchokoPay's own hosted page — you never
+touch payment details.
+</Step>
+<Step>
+### Get notified
+
+Either poll `GET /v1/payments/:reference`, or register a webhook once and get a signed
+`POST` the moment the payment succeeds or fails.
+</Step>
+</Steps>
+
+## What you get
+
+- **Multi-currency pricing** — price in any currency, settle net of fees in whatever your
+  customer actually paid with. See [Multi-currency](/docs/guides/multi-currency).
+- **Signed, replay-protected webhooks** — HMAC-signed, timestamp-bound, automatically
+  retried with backoff. See [Webhooks](/docs/guides/webhooks).
+- **Idempotent requests** — retry any `POST /v1/payments` call safely with an
+  `Idempotency-Key`. See [Idempotency & retries](/docs/guides/idempotency).
+- **Key-scoped access** — generate, rotate, and revoke API keys yourself from your
+  merchant dashboard. Revocation is immediate.
+
+## Base URL
+
+```
+https://connect.tchokopay.com
+```
+
+This is the *only* domain the Merchant API is reachable from — it exposes nothing beyond
+the routes documented here.
+
+## Rollout
+
+Cameroon (MTN MoMo, Orange Money) at launch, with more countries opening over time. Check
+[`GET /v1/channels`](/docs/api-reference/list-channels) to see what's live for your
+account right now.

@@ -1,0 +1,132 @@
+---
+title: Create a payment
+description: POST /v1/payments — create a hosted checkout payment.
+icon: CreditCard
+---
+
+<div className="flex items-center gap-2 not-prose">
+  <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
+  <code className="text-sm">/v1/payments</code>
+</div>
+
+Creates a payment and returns a hosted checkout link. Redirect your customer there —
+they pick their own payment method and complete the payment on TchokoPay's page.
+
+## Request
+
+<Tabs items={['cURL', 'Node.js', 'Python']}>
+<Tab value="cURL">
+```bash
+curl -X POST https://connect.tchokopay.com/v1/payments \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-4821-attempt-1" \
+  -d '{
+    "amount": 5000,
+    "currency": "XAF",
+    "description": "Order #4821",
+    "reference": "order_4821",
+    "expiresInMinutes": 60
+  }'
+```
+</Tab>
+<Tab value="Node.js">
+```js
+const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Idempotency-Key': 'order-4821-attempt-1',
+  },
+  body: JSON.stringify({
+    amount: 5000,
+    currency: 'XAF',
+    description: 'Order #4821',
+    reference: 'order_4821',
+    expiresInMinutes: 60,
+  }),
+});
+
+const payment = await res.json();
+```
+</Tab>
+<Tab value="Python">
+```python
+response = requests.post(
+    "https://connect.tchokopay.com/v1/payments",
+    headers={
+        "Authorization": f"Bearer {api_key}",
+        "Idempotency-Key": "order-4821-attempt-1",
+    },
+    json={
+        "amount": 5000,
+        "currency": "XAF",
+        "description": "Order #4821",
+        "reference": "order_4821",
+        "expiresInMinutes": 60,
+    },
+)
+payment = response.json()
+```
+</Tab>
+</Tabs>
+
+### Body parameters
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `amount` | number | **required** | The amount, in `currency`. Decimals are allowed where the currency supports them (e.g. `49.99` for USD) — more precision than the currency actually has is rejected, not silently rounded. |
+| `currency` | string | **required** | Any active currency code — `XAF`, `USD`, `NGN`, `BTC`, etc. Doesn't have to be your settlement currency — see [Multi-currency](/docs/guides/multi-currency). |
+| `description` | string | optional | Shown to the payer on the checkout page. Defaults to `"Payment to {your business name}"`. Max 200 characters. |
+| `reference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
+| `expiresInMinutes` | integer | optional | How long the checkout link stays payable. Default `60`, max `10080` (7 days). |
+
+### Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | **required** | `Bearer tchoko_live_...` |
+| `Content-Type` | **required** | `application/json` |
+| `Idempotency-Key` | recommended | Any string you choose, max 200 characters. Retrying with the same key returns the same payment — see [Idempotency & retries](/docs/guides/idempotency). |
+
+## Response
+
+`201 Created`
+
+```json
+{
+  "reference": "REQ-1785296850838-A5303B",
+  "status": "PENDING",
+  "amount": 5000,
+  "currency": "XAF",
+  "requestedAmount": 5000,
+  "requestedCurrency": "XAF",
+  "description": "Order #4821",
+  "merchantReference": "order_4821",
+  "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B",
+  "expiresAt": "2026-07-30T10:00:00.000Z",
+  "createdAt": "2026-07-30T09:00:00.000Z",
+  "failureCategory": null
+}
+```
+
+| Field | Description |
+|---|---|
+| `reference` | TchokoPay's own reference for this payment. Use it to check status or look it up later. |
+| `status` | `PENDING` right after creation. See [Payment status lifecycle](/docs/guides/status-lifecycle). |
+| `amount` / `currency` | What this payment is worth **right now**. Before payment, the settlement-currency equivalent of what you asked for; after payment, the real amount that actually settled. |
+| `requestedAmount` / `requestedCurrency` | The price **you asked for**, fixed for the life of the payment. |
+| `merchantReference` | Echoes back the `reference` you sent, or `null` if you didn't send one. |
+| `checkoutUrl` | Send your customer here. `null` once the payment is no longer payable. |
+| `expiresAt` | When the checkout link stops accepting payment. |
+| `failureCategory` | `null` unless `status` is `FAILED` — see [Failure categories](/docs/guides/status-lifecycle#failure-categories). |
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Validation error — bad amount, unknown currency, too much decimal precision, `Idempotency-Key` too long. |
+| `401` | Missing, invalid, or revoked API key. |
+| `403` | Account not approved, merchant API disabled, or channel restricted. |
+| `429` | Rate limit hit — see [Errors & rate limits](/docs/guides/errors-and-limits). |

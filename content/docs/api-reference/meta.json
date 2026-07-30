@@ -1,0 +1,4 @@
+{
+  "title": "API Reference",
+  "pages": ["create-payment", "get-payment", "list-channels", "webhooks-endpoint"]
+}

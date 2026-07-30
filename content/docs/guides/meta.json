@@ -1,0 +1,10 @@
+{
+  "title": "Guides",
+  "pages": [
+    "multi-currency",
+    "idempotency",
+    "webhooks",
+    "status-lifecycle",
+    "errors-and-limits"
+  ]
+}

@@ -1,0 +1,89 @@
+---
+title: Node.js — full example
+description: Charge a customer and handle the webhook, end to end.
+icon: FileCode
+---
+
+A complete, minimal integration — creating a payment with an Express route, and
+confirming it with a verified webhook.
+
+```js
+const express = require('express');
+const crypto = require('crypto');
+
+const app = express();
+const TCHOKO_KEY = process.env.TCHOKOPAY_API_KEY;
+const WEBHOOK_SECRET = process.env.TCHOKOPAY_WEBHOOK_SECRET;
+
+async function chargeCustomer(orderId, amountXaf) {
+  const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${TCHOKO_KEY}`,
+      'Content-Type': 'application/json',
+      'Idempotency-Key': `charge-${orderId}`,
+    },
+    body: JSON.stringify({
+      amount: amountXaf,
+      currency: 'XAF',
+      description: `Order ${orderId}`,
+      reference: orderId,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(`TchokoPay error: ${err.message}`);
+  }
+
+  const payment = await res.json();
+  return payment.checkoutUrl; // redirect your customer here
+}
+
+function verifyWebhook(rawBody, signatureHeader, timestampHeader, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestampHeader}.${rawBody}`)
+    .digest('hex');
+
+  const provided = signatureHeader.replace('sha256=', '');
+  const valid = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
+
+  const age = Math.abs(Date.now() / 1000 - Number(timestampHeader));
+  if (age > 300) return false; // stale — reject even if the signature matches
+
+  return valid;
+}
+
+app.get('/checkout/:orderId', async (req, res) => {
+  const checkoutUrl = await chargeCustomer(req.params.orderId, 5000);
+  res.redirect(checkoutUrl);
+});
+
+app.post('/webhooks/tchokopay', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-tchokopay-signature'];
+  const timestamp = req.headers['x-tchokopay-timestamp'];
+
+  if (!verifyWebhook(req.body.toString(), signature, timestamp, WEBHOOK_SECRET)) {
+    return res.status(400).send('invalid signature');
+  }
+
+  const event = JSON.parse(req.body.toString());
+
+  if (event.status === 'SUCCESS') {
+    markOrderPaid(event.invoiceReference, event.settledAmount, event.settledCurrency);
+  } else if (event.status === 'FAILED') {
+    markOrderFailed(event.invoiceReference, event.failureReason);
+  }
+
+  res.sendStatus(200);
+});
+
+app.listen(3000);
+```
+
+<Callout type="info">
+  The webhook route uses `express.raw()`, not `express.json()` — signature verification
+  needs the exact raw bytes that were sent, before any parsing. See
+  [Webhooks](/docs/guides/webhooks#verifying-the-signature) for why this matters.
+</Callout>

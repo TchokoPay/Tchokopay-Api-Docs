@@ -1,0 +1,75 @@
+---
+title: Authentication
+description: How API keys work and how to keep them safe.
+icon: KeyRound
+---
+
+Every request to the Merchant API is authenticated with an API key, sent as a bearer
+token:
+
+```
+Authorization: Bearer tchoko_live_...
+```
+
+There's no separate session or OAuth flow — the key *is* your credential.
+
+## Getting a key
+
+Generate keys from your [merchant dashboard](https://tchokopay.com/merchant/developers) →
+**Developers** → **Generate API Key**. The plaintext key is shown **exactly once**;
+TchokoPay only ever stores its hash and can't show it to you again. If you lose it,
+revoke it and generate a new one.
+
+You can hold multiple keys at once — for example, one per environment or integration —
+and revoke any of them independently without affecting the others.
+
+## Using a key
+
+<Tabs items={['cURL', 'Node.js', 'Python']}>
+<Tab value="cURL">
+```bash
+curl https://connect.tchokopay.com/v1/channels \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+</Tab>
+<Tab value="Node.js">
+```js
+const headers = {
+  Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
+};
+
+const res = await fetch('https://connect.tchokopay.com/v1/channels', { headers });
+```
+</Tab>
+<Tab value="Python">
+```python
+import os
+import requests
+
+headers = {"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"}
+response = requests.get("https://connect.tchokopay.com/v1/channels", headers=headers)
+```
+</Tab>
+</Tabs>
+
+<Callout type="warn">
+  Never embed your API key in frontend/client-side code, a mobile app, or a public repo.
+  Anyone with your key can create payments and read your payment history on your
+  account. Keep it server-side, in an environment variable or secret manager.
+</Callout>
+
+## Revocation is immediate
+
+Revoke a key from the dashboard and it stops working on your **very next** request — no
+propagation delay, no grace period. If your merchant account itself is suspended, every
+key on the account stops working immediately too, even ones you never explicitly revoked.
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing, malformed, invalid, or revoked API key. |
+| `403` | The key is valid, but your merchant account isn't approved, the merchant API is temporarily disabled platform-wide, or your settlement channel is restricted. |
+
+Both cases include a message telling you exactly what's wrong — see
+[Errors & rate limits](/docs/guides/errors-and-limits) for the full picture.

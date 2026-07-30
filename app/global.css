@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+@theme inline {
+  /* Brand font (next/font/google Sora, loaded in app/layout.tsx) — replaces
+     Tailwind's default system-ui stack everywhere font-sans is used. */
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* TchokoPay brand — matches --primary: 226 80% 48% (hsl) from the main app's
+   design system (tchokopay-frontend/app/globals.css), converted to the OKLCH
+   Fumadocs' preset expects. Same royal-blue accent, not a generic docs-theme default. */
+:root {
+  --color-fd-primary: oklch(0.51 0.22 262);
+  --color-fd-primary-foreground: oklch(0.98 0 0);
+}
+
+.dark {
+  --color-fd-primary: oklch(0.68 0.19 262);
+  --color-fd-primary-foreground: oklch(0.15 0.02 262);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* ── Layout robustness ──────────────────────────────────────────────────
+   Long inline code (endpoint paths, currency codes, env var names) and long
+   plain URLs in prose/table text were overflowing their containers on
+   narrow viewports instead of wrapping — the classic docs-site "text runs
+   off the edge of the card" bug. Force-wrap everything except real code
+   blocks (which get their own horizontal scroll, not text wrapping). */
+.prose :where(p, li, td, th) {
+  overflow-wrap: break-word;
+}
+
+.prose :where(code):not(pre code) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Fumadocs' default table isn't wrapped in a scroll container — a wide
+   table (our API-reference field tables run 3-4 columns) can blow out the
+   page width on mobile instead of scrolling internally. */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Subtle dot-grid used behind the landing hero — CSS only, no image asset,
+   themed for both light/dark via currentColor + low opacity. */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, var(--color-fd-foreground) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.06;
+}

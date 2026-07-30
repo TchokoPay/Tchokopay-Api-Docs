@@ -1,0 +1,114 @@
+---
+title: Quickstart
+description: Create your first payment in under five minutes.
+icon: Rocket
+---
+
+## 1. Get an API key
+
+<Steps>
+<Step>
+Log in to your [TchokoPay merchant dashboard](https://tchokopay.com/merchant/developers)
+and go to **Developers**.
+</Step>
+<Step>
+Click **Generate API Key**. It's shown **once** — copy it somewhere safe. TchokoPay never
+stores the plaintext key and can't show it to you again.
+</Step>
+<Step>
+Your key looks like `tchoko_live_8f3a9c2e1b7d4f6a0e5c3b8d7a2f1e9c...`. Treat it like a
+password.
+</Step>
+</Steps>
+
+## 2. Create a payment
+
+<Tabs items={['cURL', 'Node.js', 'Python']}>
+<Tab value="cURL">
+```bash
+curl -X POST https://connect.tchokopay.com/v1/payments \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000,
+    "currency": "XAF",
+    "description": "Order #4821",
+    "reference": "order_4821"
+  }'
+```
+</Tab>
+<Tab value="Node.js">
+```js
+const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    amount: 5000,
+    currency: 'XAF',
+    description: 'Order #4821',
+    reference: 'order_4821',
+  }),
+});
+
+const payment = await res.json();
+console.log(payment.checkoutUrl);
+```
+</Tab>
+<Tab value="Python">
+```python
+import os
+import requests
+
+response = requests.post(
+    "https://connect.tchokopay.com/v1/payments",
+    headers={"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"},
+    json={
+        "amount": 5000,
+        "currency": "XAF",
+        "description": "Order #4821",
+        "reference": "order_4821",
+    },
+)
+response.raise_for_status()
+payment = response.json()
+print(payment["checkoutUrl"])
+```
+</Tab>
+</Tabs>
+
+## 3. Read the response
+
+```json
+{
+  "reference": "REQ-1785296850838-A5303B",
+  "status": "PENDING",
+  "amount": 5000,
+  "currency": "XAF",
+  "requestedAmount": 5000,
+  "requestedCurrency": "XAF",
+  "description": "Order #4821",
+  "merchantReference": "order_4821",
+  "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B",
+  "expiresAt": "2026-07-30T10:00:00.000Z",
+  "createdAt": "2026-07-30T09:00:00.000Z",
+  "failureCategory": null
+}
+```
+
+## 4. Redirect your customer
+
+Send them to `checkoutUrl`. They pick their own payment method and complete the payment
+on TchokoPay's hosted page — no payment UI for you to build.
+
+## 5. Find out what happened
+
+Either poll [`GET /v1/payments/:reference`](/docs/api-reference/get-payment), or set up a
+[webhook](/docs/guides/webhooks) once and get notified automatically.
+
+<Callout type="info">
+  Every field in this response is documented in full on the
+  [`POST /v1/payments` reference page](/docs/api-reference/create-payment).
+</Callout>

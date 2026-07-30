@@ -1,0 +1,14 @@
+{
+  "title": "Merchant API",
+  "pages": [
+    "index",
+    "quickstart",
+    "authentication",
+    "---Guides---",
+    "guides",
+    "---API Reference---",
+    "api-reference",
+    "---Examples---",
+    "examples"
+  ]
+}

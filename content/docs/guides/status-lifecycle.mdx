@@ -1,0 +1,41 @@
+---
+title: Payment status lifecycle
+description: Every state a payment can be in, and what to expect from checkoutUrl in each.
+icon: Waypoints
+---
+
+```
+PENDING  ──▶  PROCESSING  ──▶  SUCCESS
+                    │
+                    └────────▶ FAILED
+   │
+   └──────────────────────────▶ CANCELLED   (checkout link expired unpaid)
+```
+
+<Cards>
+  <Card title="PENDING" description="Created, payer hasn't started paying yet. checkoutUrl is live." />
+  <Card title="PROCESSING" description="Payer has chosen a method and a payment attempt is in flight. checkoutUrl is still live (useful if they refresh the page)." />
+  <Card title="SUCCESS" description="Done. Funds are settling to your wallet, net of fees." />
+  <Card title="FAILED" description="The attempt didn't go through. Check failureCategory below. The payer can usually retry on the same checkoutUrl if it hasn't expired." />
+  <Card title="CANCELLED" description="The checkout link's expiresAt passed with no successful payment." />
+</Cards>
+
+<Callout type="info">
+  `checkoutUrl` is `null` once a payment leaves `PENDING`/`PROCESSING` for a terminal
+  state (`SUCCESS`, `FAILED` past its retry window, or `CANCELLED`) — nothing left to send
+  your customer to.
+</Callout>
+
+## Failure categories
+
+When `status` is `FAILED`, `failureCategory` tells you *why*, without exposing raw
+provider error text:
+
+| Category | Meaning |
+|---|---|
+| `ABANDONED` | The payer never completed the prompt on their end — didn't approve the USSD prompt, closed the app, etc. |
+| `DECLINED` | The payer's provider explicitly rejected it — insufficient funds, wrong PIN, etc. |
+| `SYSTEM` | Something failed on our side or the aggregator's side — not the payer's fault. |
+
+Use this to tailor what you show the customer: `ABANDONED`/`DECLINED` usually just need a
+retry; `SYSTEM` might warrant a "try again in a moment" message instead.

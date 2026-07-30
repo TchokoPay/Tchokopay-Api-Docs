@@ -1,0 +1,70 @@
+---
+title: Manage webhooks
+description: POST/GET /v1/webhooks — register and check your webhook endpoint.
+icon: Webhook
+---
+
+See [Webhooks](/docs/guides/webhooks) for the full guide, including the payload shape
+and how to verify signatures. This page is the endpoint reference.
+
+## Register an endpoint
+
+<div className="flex items-center gap-2 not-prose">
+  <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
+  <code className="text-sm">/v1/webhooks</code>
+</div>
+
+```bash
+curl -X POST https://connect.tchokopay.com/v1/webhooks \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://mystore.example.com/webhooks/tchokopay" }'
+```
+
+### Body parameters
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `url` | string | **required** | A publicly reachable `http(s)` URL. Private/internal addresses are rejected. |
+
+### Response
+
+`200 OK` — the signing secret is only ever shown here, on registration:
+
+```json
+{
+  "url": "https://mystore.example.com/webhooks/tchokopay",
+  "signingSecret": "whsec_a1b2c3d4e5f6...",
+  "isActive": true,
+  "updatedAt": "2026-07-30T09:00:00.000Z"
+}
+```
+
+<Callout type="warn">
+  Registering a new URL replaces your existing endpoint and rotates the secret — there's
+  only ever one webhook endpoint per merchant account.
+</Callout>
+
+## Check your current endpoint
+
+<div className="flex items-center gap-2 not-prose">
+  <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">GET</span>
+  <code className="text-sm">/v1/webhooks</code>
+</div>
+
+```bash
+curl https://connect.tchokopay.com/v1/webhooks \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+
+```json
+{
+  "url": "https://mystore.example.com/webhooks/tchokopay",
+  "isActive": true,
+  "disabledReason": null,
+  "updatedAt": "2026-07-30T09:00:00.000Z"
+}
+```
+
+The signing secret is never returned again after registration — if you've lost it,
+register the same URL again to rotate it.

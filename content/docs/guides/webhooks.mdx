@@ -1,0 +1,180 @@
+---
+title: Webhooks
+description: Get notified the moment a payment resolves — no polling.
+icon: Webhook
+---
+
+Register a URL once and TchokoPay will `POST` to it every time one of your payments
+reaches a terminal state, signed so you can verify it actually came from TchokoPay.
+
+## Registering an endpoint
+
+```bash
+curl -X POST https://connect.tchokopay.com/v1/webhooks \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://mystore.example.com/webhooks/tchokopay" }'
+```
+
+The response includes your signing secret, shown **once** — save it:
+
+```json
+{
+  "url": "https://mystore.example.com/webhooks/tchokopay",
+  "signingSecret": "whsec_a1b2c3d4e5f6...",
+  "isActive": true,
+  "updatedAt": "2026-07-30T09:00:00.000Z"
+}
+```
+
+<Callout type="info">
+  One endpoint per merchant account. Registering a new URL rotates the secret and clears
+  any auto-disable state (see below). `GET /v1/webhooks` returns your current endpoint's
+  `url`, `isActive`, and disable status — never the secret again.
+</Callout>
+
+Your URL must be a real, publicly reachable `http(s)` address. Private/internal addresses
+(`localhost`, `169.254.x.x`, RFC1918 ranges, etc.) are rejected at registration time, and
+re-checked again immediately before every single delivery.
+
+## What you receive
+
+A signed `POST` when a payment reaches `SUCCESS` or `FAILED`:
+
+```json
+{
+  "invoiceReference": "REQ-1785296850838-A5303B",
+  "status": "SUCCESS",
+  "amount": 0.00088456,
+  "currency": "BTC",
+  "settledAmount": 0.00078347,
+  "settledCurrency": "BTC",
+  "requestedAmount": 50,
+  "requestedCurrency": "USD",
+  "paymentMethod": "LIGHTNING",
+  "failureReason": null,
+  "timestamp": "2026-07-30T09:04:12.000Z"
+}
+```
+
+<Callout type="warn" title="amount vs. settledAmount">
+  `amount`/`currency` is what the **payer was actually charged** (fee-inclusive).
+  `settledAmount`/`settledCurrency` is what **you** actually received (net) — the same
+  number `GET /v1/payments/:reference` returns as `amount`/`currency`. These are two
+  different, both-correct numbers by design: the gap between them is the platform fee.
+  Use whichever one answers the question you're actually asking.
+</Callout>
+
+Headers on every delivery:
+
+```
+X-TchokoPay-Signature: sha256=<hex hmac>
+X-TchokoPay-Timestamp: 1785296852
+X-TchokoPay-Event: payment.succeeded
+```
+
+`X-TchokoPay-Event` is `payment.succeeded` or `payment.failed`.
+
+## Verifying the signature
+
+<Tabs items={['Node.js', 'Python']}>
+<Tab value="Node.js">
+```js
+const crypto = require('crypto');
+
+function verifyWebhook(rawBody, signatureHeader, timestampHeader, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestampHeader}.${rawBody}`)
+    .digest('hex');
+
+  const provided = signatureHeader.replace('sha256=', '');
+  const valid = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
+
+  // Reject anything older than 5 minutes even with a valid signature —
+  // protects against a captured delivery being replayed later.
+  const age = Math.abs(Date.now() / 1000 - Number(timestampHeader));
+  if (age > 300) return false;
+
+  return valid;
+}
+
+app.post('/webhooks/tchokopay', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-tchokopay-signature'];
+  const timestamp = req.headers['x-tchokopay-timestamp'];
+
+  if (!verifyWebhook(req.body.toString(), signature, timestamp, process.env.TCHOKOPAY_WEBHOOK_SECRET)) {
+    return res.status(400).send('invalid signature');
+  }
+
+  const event = JSON.parse(req.body.toString());
+  if (event.status === 'SUCCESS') {
+    markOrderPaid(event.invoiceReference, event.settledAmount, event.settledCurrency);
+  }
+
+  res.sendStatus(200);
+});
+```
+</Tab>
+<Tab value="Python">
+```python
+import hmac
+import hashlib
+import time
+from flask import Flask, request, abort
+
+app = Flask(__name__)
+
+def verify_webhook(raw_body: bytes, signature_header: str, timestamp_header: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode(),
+        f"{timestamp_header}.{raw_body.decode()}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+    provided = signature_header.replace("sha256=", "")
+    valid = hmac.compare_digest(expected, provided)
+
+    # Reject anything older than 5 minutes even with a valid signature.
+    age = abs(time.time() - float(timestamp_header))
+    if age > 300:
+        return False
+
+    return valid
+
+
+@app.post("/webhooks/tchokopay")
+def tchokopay_webhook():
+    signature = request.headers.get("X-TchokoPay-Signature", "")
+    timestamp = request.headers.get("X-TchokoPay-Timestamp", "")
+
+    if not verify_webhook(request.get_data(), signature, timestamp, WEBHOOK_SECRET):
+        abort(400, "invalid signature")
+
+    event = request.get_json()
+    if event["status"] == "SUCCESS":
+        mark_order_paid(event["invoiceReference"], event["settledAmount"], event["settledCurrency"])
+
+    return "", 200
+```
+</Tab>
+</Tabs>
+
+<Callout type="error" title="Use the raw body">
+  Compute the HMAC over the **raw request body bytes** you received, not a re-serialized
+  copy. Re-parsing and re-stringifying JSON can reorder keys and produce a signature
+  mismatch that has nothing to do with tampering — this is the single most common
+  integration bug with webhook verification.
+</Callout>
+
+## Retries and auto-disable
+
+A failed delivery (your endpoint down, timing out, or returning a non-2xx) is retried
+automatically with backoff. If your endpoint fails **10 consecutive events with zero
+successes**, it's automatically disabled so you stop losing retries into a dead URL —
+you'll see this on `GET /v1/webhooks` (`isActive: false`, `disabledReason` set) and in
+your merchant dashboard, with a one-click reactivate that doesn't require rotating your
+secret.
+
+If you'd rather not rely on webhooks at all,
+[`GET /v1/payments/:reference`](/docs/api-reference/get-payment) always works — poll it.
