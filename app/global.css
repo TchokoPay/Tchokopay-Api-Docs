@@ -8,6 +8,12 @@
   /* Brand font (next/font/google Sora, loaded in app/layout.tsx) — replaces
      Tailwind's default system-ui stack everywhere font-sans is used. */
   --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+
+  /* Tailwind's default jump from no-breakpoint to `sm` (640px) is too big
+     for "stack two buttons until there's room to sit side by side" — most
+     phones (375-428px wide) have room for two short buttons in a row well
+     before 640px, and were stacking unnecessarily. */
+  --breakpoint-xs: 24rem; /* 384px */
 }
 
 /* TchokoPay brand — matches --primary: 226 80% 48% (hsl) from the main app's
