@@ -77,7 +77,7 @@ payment = response.json()
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `amount` | number | **required** | The amount, in `currency`. Decimals are allowed where the currency supports them (e.g. `49.99` for USD) — more precision than the currency actually has is rejected, not silently rounded. |
-| `currency` | string | **required** | Any active currency code — `XAF`, `USD`, `NGN`, `BTC`, etc. Doesn't have to be your settlement currency — see [Multi-currency](/docs/guides/multi-currency). |
+| `currency` | string | **required** | Any active currency code — `XAF`, `USD`, `NGN`, `BTC`, etc. There's no fixed settlement currency to match — see [Multi-currency](/docs/guides/multi-currency). |
 | `description` | string | optional | Shown to the payer on the checkout page. Defaults to `"Payment to {your business name}"`. Max 200 characters. |
 | `reference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
 | `expiresInMinutes` | integer | optional | How long the checkout link stays payable. Default `60`, max `10080` (7 days). |
@@ -115,7 +115,7 @@ payment = response.json()
 |---|---|
 | `reference` | TchokoPay's own reference for this payment. Use it to check status or look it up later. |
 | `status` | `PENDING` right after creation. See [Payment status lifecycle](/docs/guides/status-lifecycle). |
-| `amount` / `currency` | What this payment is worth **right now**. Before payment, the settlement-currency equivalent of what you asked for; after payment, the real amount that actually settled. |
+| `amount` / `currency` | What this payment is worth **right now**. Before payment, identical to `requestedAmount`/`requestedCurrency`; after payment, the real amount that actually settled into your wallet. |
 | `requestedAmount` / `requestedCurrency` | The price **you asked for**, fixed for the life of the payment. |
 | `merchantReference` | Echoes back the `reference` you sent, or `null` if you didn't send one. |
 | `checkoutUrl` | Send your customer here. `null` once the payment is no longer payable. |
@@ -128,5 +128,5 @@ payment = response.json()
 |---|---|
 | `400` | Validation error — bad amount, unknown currency, too much decimal precision, `Idempotency-Key` too long. |
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Account not approved, merchant API disabled, or channel restricted. |
+| `403` | Account not approved, or the merchant API is temporarily disabled platform-wide. |
 | `429` | Rate limit hit — see [Errors & rate limits](/docs/guides/errors-and-limits). |

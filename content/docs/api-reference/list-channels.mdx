@@ -1,6 +1,6 @@
 ---
 title: List channels
-description: GET /v1/channels — check what payment channels are available to you.
+description: GET /v1/channels — see what payment methods your customers can currently use.
 icon: Radio
 ---
 
@@ -9,8 +9,9 @@ icon: Radio
   <code className="text-sm break-all">/v1/channels</code>
 </div>
 
-Returns the payment channels currently available to your account — a good citizenship
-check before you assume a channel works, rather than discovering it's disabled mid-flow.
+Lists every payin method your customers can currently use, platform-wide — useful if you
+want to show a payer, in your own UI, what to expect before they even reach the hosted
+checkout page.
 
 ```bash
 curl https://connect.tchokopay.com/v1/channels \
@@ -23,14 +24,20 @@ curl https://connect.tchokopay.com/v1/channels \
 
 ```json
 [
-  { "providerCode": "mtn_cm", "method": "MOMO", "country": "CM", "available": true, "reason": null }
+  { "providerCode": "mtn_cm", "method": "MOBILE_MONEY", "country": "CM", "available": true, "reason": null },
+  { "providerCode": "orange_cm", "method": "MOBILE_MONEY", "country": "CM", "available": true, "reason": null }
 ]
 ```
 
 | Field | Description |
 |---|---|
 | `providerCode` | Internal provider identifier. |
-| `method` | Payment method — `MOMO`, `ORANGE`, etc. |
+| `method` | Payment method — `MOBILE_MONEY`, etc. |
 | `country` | ISO country code this channel serves. |
-| `available` | Whether this channel currently works for your account. |
-| `reason` | `null` when `available` is `true`. Otherwise `"not_yet_enabled"` (this channel isn't open platform-wide yet) or `"restricted"` (specifically disabled for your account). |
+| `available` | Kept for forward compatibility — currently always `true`. |
+| `reason` | Kept for forward compatibility — currently always `null`. |
+
+<Callout type="info">
+  This reflects what's open platform-wide, not something specific to your account —
+  every approved merchant sees the same list.
+</Callout>

@@ -25,7 +25,7 @@ fix.
 |---|---|
 | `400` | Validation error — bad amount, unknown currency, more decimal precision than the currency supports, `Idempotency-Key` too long, malformed webhook URL. |
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Your merchant account isn't approved, the merchant API is temporarily disabled platform-wide, your settlement channel isn't API-enabled yet, or API access to your channel has been specifically restricted. |
+| `403` | Your merchant account isn't approved, or the merchant API is temporarily disabled platform-wide. |
 | `404` | The payment reference doesn't exist, or belongs to a different merchant account — both look identical, so you can't use this endpoint to probe whether a reference exists. |
 | `429` | Rate limit hit — see below. |
 

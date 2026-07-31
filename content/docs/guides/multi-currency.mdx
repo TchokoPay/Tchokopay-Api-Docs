@@ -4,8 +4,9 @@ description: Price in one currency, settle in whatever the payer used.
 icon: Globe2
 ---
 
-You can price a payment in **any active currency** — `XAF`, `USD`, `NGN`, `BTC`, and more
-— completely independent of your own account's settlement currency.
+You can price a payment in **any active currency** — `XAF`, `USD`, `NGN`, `BTC`, and more.
+There's no account-level "settlement currency" to match — every payment settles
+independently, in whatever currency your customer actually pays with.
 
 ```bash
 curl -X POST https://connect.tchokopay.com/v1/payments \
@@ -18,26 +19,24 @@ curl -X POST https://connect.tchokopay.com/v1/payments \
   }'
 ```
 
-If your account settles in XAF, the response looks like this **before anyone has paid**:
+Before anyone has paid, the response mirrors exactly what you asked for — nothing is
+converted yet:
 
 ```json
 {
   "reference": "REQ-1785296850838-A5303B",
   "status": "PENDING",
-  "amount": 28818,
-  "currency": "XAF",
+  "amount": 50,
+  "currency": "USD",
   "requestedAmount": 50,
   "requestedCurrency": "USD",
   "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B"
 }
 ```
 
-`requestedAmount`/`requestedCurrency` stay `50`/`USD` forever — that's the price you
-asked for. `amount`/`currency` show the clean XAF equivalent as an estimate.
+## After payment, `amount`/`currency` reflect what actually settled
 
-## After payment, the settlement currency can change
-
-Say your customer pays with Bitcoin instead of XAF. Once payment completes,
+Say your customer pays with Bitcoin. Once payment completes,
 `GET /v1/payments/:reference` returns:
 
 ```json
@@ -52,18 +51,20 @@ Say your customer pays with Bitcoin instead of XAF. Once payment completes,
 ```
 
 You settle net of fees in **whatever currency your customer actually paid with** — your
-wallet becomes genuinely multi-currency, with one real balance per currency that's ever
-come in.
+wallet is genuinely multi-currency, with one real balance per currency that's ever
+come in. A customer paying in XAF, another in NGN, and another in BTC for the same
+`$50` price point all land in three separate wallet balances — there's currently no
+automatic conversion or consolidation into a single currency.
 
 <Callout type="info">
   `requestedAmount`/`requestedCurrency` never change once a payment is created.
-  `amount`/`currency` always reflect the live/settled truth — the estimate before
-  payment, the real settled amount after.
+  `amount`/`currency` always reflect the live/settled truth — identical to the
+  request before payment, the real settled amount after.
 </Callout>
 
-## Keeping it simple
+## Where the money goes
 
-If you'd rather always settle in one predictable currency, just price every payment in
-your own settlement currency. Then `amount === requestedAmount` and
-`currency === requestedCurrency`, always — multi-currency pricing is opt-in, not
-something you have to think about if you don't need it.
+Money accepted through the API stays on TchokoPay — held in your wallet, not routed
+anywhere automatically — until you withdraw it from your merchant dashboard
+(`/merchant/payouts`). There's no per-payment payout dispatch to configure or think
+about; every payment, in every currency, settles the same way.
