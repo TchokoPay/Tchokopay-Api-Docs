@@ -10,8 +10,10 @@ icon: ArrowUpRight
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
 </div>
 
-Sends money from your TchokoPay balance to somebody else's mobile money number — a
-supplier, a marketplace seller, a driver.
+Sends money from your TchokoPay balance to any mobile money number.
+
+What the payment is for is yours to decide — a seller settlement, a user withdrawal, a
+loan disbursement, a refund. The API does not model it.
 
 <Callout type="warn">
 This is not a withdrawal. A withdrawal moves your balance to **your own** account and
@@ -29,14 +31,14 @@ Requires a key with the **Send payouts** permission. See [Scopes](/docs/authenti
 curl -X POST https://connect.tchokopay.com/v1/payouts \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: supplier-8821-attempt-1" \
+  -H "Idempotency-Key: payout-4417-attempt-1" \
   -d '{
     "amount": 25000,
     "currency": "XAF",
     "recipientPhone": "670000000",
     "recipientName": "Amina Njoya",
     "payoutProviderCode": "mtn_cm",
-    "reference": "supplier-invoice-8821"
+    "reference": "payout_4417"
   }'
 ```
 </Tab>
@@ -48,7 +50,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/payouts', {
     Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}`,
     'Content-Type': 'application/json',
     // Required, not optional. Same key twice returns the same payout.
-    'Idempotency-Key': 'supplier-8821-attempt-1',
+    'Idempotency-Key': 'payout-4417-attempt-1',
   },
   body: JSON.stringify({
     amount: 25000,
@@ -56,7 +58,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/payouts', {
     recipientPhone: '670000000',
     recipientName: 'Amina Njoya',
     payoutProviderCode: 'mtn_cm',
-    reference: 'supplier-invoice-8821',
+    reference: 'payout_4417',
   }),
 });
 
@@ -69,7 +71,7 @@ response = requests.post(
     "https://connect.tchokopay.com/v1/payouts",
     headers={
         "Authorization": f"Bearer {payout_key}",
-        "Idempotency-Key": "supplier-8821-attempt-1",
+        "Idempotency-Key": "payout-4417-attempt-1",
     },
     json={
         "amount": 25000,
@@ -77,7 +79,7 @@ response = requests.post(
         "recipientPhone": "670000000",
         "recipientName": "Amina Njoya",
         "payoutProviderCode": "mtn_cm",
-        "reference": "supplier-invoice-8821",
+        "reference": "payout_4417",
     },
 )
 payout = response.json()
@@ -123,7 +125,7 @@ recalled. Send the same key again and you get the same payout back, never a seco
   "currency": "XAF",
   "recipientPhone": "670000000",
   "recipientName": "Amina Njoya",
-  "merchantReference": "supplier-invoice-8821",
+  "merchantReference": "payout_4417",
   "providerReference": null,
   "awaitingReview": true,
   "statusReason": "Above the 20000 review threshold — held for approval rather than dispatched automatically.",

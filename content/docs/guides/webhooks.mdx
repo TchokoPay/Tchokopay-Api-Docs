@@ -95,7 +95,7 @@ Payout events carry a different body from payment events:
     "currency": "XAF",
     "recipientPhone": "670000000",
     "recipientName": "Amina Njoya",
-    "merchantReference": "supplier-invoice-8821",
+    "merchantReference": "payout_4417",
     "providerReference": "MMH17797898332",
     "statusReason": null
   }
@@ -107,7 +107,7 @@ receives all five; branch on `X-TchokoPay-Event`.
 
 <Callout>
 `payout.sent` is not `payout.paid`. The first means the network accepted it, the second
-means the recipient has it. Don't tell a supplier they've been paid on `payout.sent`.
+means the recipient has it. Do not tell your user the money has arrived on `payout.sent`.
 </Callout>
 
 ## Verifying the signature

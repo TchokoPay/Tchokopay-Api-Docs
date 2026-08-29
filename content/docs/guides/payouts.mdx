@@ -4,8 +4,13 @@ description: How money leaves your balance, and the controls around it.
 icon: ArrowUpRight
 ---
 
-The Merchant API moves money both ways. Payments bring it in; payouts send it back out to
-somebody else — a supplier, a marketplace seller, a driver, a refund to a specific number.
+The Merchant API moves money both ways. Payments bring it in; payouts send it out again —
+to any mobile money number, for any reason your business has.
+
+We do not model what the payment is for. A platform settling its sellers, an app paying
+out its users' balances, a lender disbursing a loan, a fintech routing its own customers'
+transfers through our rails rather than building operator integrations itself — all of it
+is the same call. You know what the money is for; we move it.
 
 ## Payouts are not withdrawals
 
@@ -32,7 +37,10 @@ limits.
 ## The controls
 
 Because a payout moves real money with no human in the loop, several things bound it.
-Every one of them is checked before your balance moves.
+Every one is checked before your balance moves.
+
+These are risk controls, not a budget — they exist so that a mistake, a bug in your own
+code, or a stolen key stays small.
 
 <Steps>
 <Step>
@@ -42,10 +50,12 @@ Sending payouts is a separate permission from taking payments, chosen when a key
 and never widened afterwards. See [Scopes](/docs/authentication#scopes).
 </Step>
 <Step>
-### The amount must fit your limits
+### The amount must fit your payout limits
 
-A per-payout ceiling, a rolling daily ceiling, and a rolling weekly one. Check what's left
-with [`GET /v1/payout-limits/:currency`](/docs/api-reference/payout-limits).
+A per-payout ceiling, a rolling daily ceiling, and a rolling weekly one, set on your
+account. Check what is left with
+[`GET /v1/payout-limits/:currency`](/docs/api-reference/payout-limits) — high-volume
+accounts get ceilings to match their volume.
 </Step>
 <Step>
 ### You must actually have the money
@@ -71,7 +81,7 @@ tidy-up. A duplicated payout sends real money twice and cannot be recalled.
 ```js
 // Derive the key from something stable in YOUR system, not a random value
 // per attempt — a retry has to produce the same key or it isn't a retry.
-const idempotencyKey = `payout-${supplierInvoiceId}`;
+const idempotencyKey = `payout-${yourPayoutInstructionId}`;
 ```
 
 Send the same key again and you get the original payout back, with its original
@@ -91,30 +101,37 @@ You'll get a `payout.failed` webhook, and the payout will show why in `statusRea
 ## A full example
 
 ```js
-async function payoutToSupplier(invoice) {
+// `instruction` is whatever your system calls a payment it owes somebody:
+// a seller settlement, a user withdrawal, a loan disbursement, a refund.
+async function sendPayout(instruction) {
   // Fail early rather than half way through a batch.
   const limits = await get('/v1/payout-limits/XAF');
-  if (!limits.configured) throw new Error('Payouts not enabled yet');
-  if (limits.remainingToday !== null && limits.remainingToday < invoice.amount) {
-    throw new Error('Would exceed today’s payout limit');
+  if (!limits.configured) throw new Error('Payouts not enabled on this account');
+  if (limits.remainingToday !== null && limits.remainingToday < instruction.amount) {
+    throw new Error('Would exceed the daily payout limit');
   }
 
   const payout = await post('/v1/payouts', {
-    amount: invoice.amount,
+    amount: instruction.amount,
     currency: 'XAF',
-    recipientPhone: invoice.supplierPhone,
-    recipientName: invoice.supplierName,
-    reference: invoice.id,
-  }, { 'Idempotency-Key': `payout-${invoice.id}` });
+    recipientPhone: instruction.recipientPhone,
+    recipientName: instruction.recipientName,
+    // Your own id, so you can reconcile without storing ours.
+    reference: instruction.id,
+  }, {
+    // Derived from your id, not random per attempt — a retry has to produce
+    // the same key or it is not a retry.
+    'Idempotency-Key': `payout-${instruction.id}`,
+  });
 
   if (payout.awaitingReview) {
-    // Funded and queued, but a person has to release it. Don't retry —
-    // retrying with the same key returns this same payout.
-    await markAwaitingApproval(invoice.id, payout.reference);
+    // Funded and queued, but a person has to release it. Do not retry —
+    // the same key returns this same payout.
+    await markAwaitingApproval(instruction.id, payout.reference);
     return;
   }
 
-  await markSent(invoice.id, payout.reference);
+  await markSent(instruction.id, payout.reference);
 }
 ```
 
