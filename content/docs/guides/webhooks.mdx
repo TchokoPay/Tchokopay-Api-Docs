@@ -73,7 +73,42 @@ X-TchokoPay-Timestamp: 1785296852
 X-TchokoPay-Event: payment.succeeded
 ```
 
-`X-TchokoPay-Event` is `payment.succeeded` or `payment.failed`.
+`X-TchokoPay-Event` names the event. There are five:
+
+| Event | When |
+|---|---|
+| `payment.succeeded` | A customer's payment cleared. |
+| `payment.failed` | A customer's payment didn't. |
+| `payout.sent` | A payout was handed to the network and accepted. |
+| `payout.paid` | A payout was confirmed delivered. |
+| `payout.failed` | A payout was refused by the network, or declined during review. |
+
+Payout events carry a different body from payment events:
+
+```json
+{
+  "event": "payout.paid",
+  "data": {
+    "reference": "PO-1787962449863-7B361B",
+    "status": "PAID",
+    "amount": 25000,
+    "currency": "XAF",
+    "recipientPhone": "670000000",
+    "recipientName": "Amina Njoya",
+    "merchantReference": "supplier-invoice-8821",
+    "providerReference": "MMH17797898332",
+    "statusReason": null
+  }
+}
+```
+
+Everything else — the signature, the retries, the endpoint — is identical. One endpoint
+receives all five; branch on `X-TchokoPay-Event`.
+
+<Callout>
+`payout.sent` is not `payout.paid`. The first means the network accepted it, the second
+means the recipient has it. Don't tell a supplier they've been paid on `payout.sent`.
+</Callout>
 
 ## Verifying the signature
 

@@ -16,12 +16,46 @@ There's no separate session or OAuth flow — the key *is* your credential.
 ## Getting a key
 
 Generate keys from your [merchant dashboard](https://tchokopay.com/merchant/developers) →
-**Developers** → **Generate API Key**. The plaintext key is shown **exactly once**;
-TchokoPay only ever stores its hash and can't show it to you again. If you lose it,
-revoke it and generate a new one.
+**Developers** → **New API key**. Name it, tick what it's allowed to do, and copy the
+secret — the plaintext key is shown **exactly once**; TchokoPay only ever stores its hash
+and can't show it to you again. If you lose it, revoke it and generate a new one.
 
-You can hold multiple keys at once — for example, one per environment or integration —
-and revoke any of them independently without affecting the others.
+You can hold multiple keys at once — and you should, for the reason below.
+
+## Scopes
+
+Every key carries a list of permissions, chosen when you create it.
+
+| Permission | Lets the key | If it leaks |
+|---|---|---|
+| **Take payments** | Create charges, read your own payments | Junk invoices nobody has to pay. Annoying, not expensive. |
+| **Send payouts** | Move money out of your balance | **Somebody can spend your balance.** |
+| **Read only** | Look at balances and history | Disclosure, but nothing moves. |
+
+They're independent, not a ladder. Taking payments never implies sending payouts.
+
+<Callout type="warn">
+**Use two keys.** One with *take payments* for whatever creates charges — often something
+public-facing. One with *send payouts* on a locked-down server that nothing else touches.
+
+Then a leaked checkout key costs you nothing. One key holding both means the key in your
+storefront is also the key that can empty your balance.
+</Callout>
+
+### Scopes can't be widened
+
+There's no endpoint to add a permission to an existing key, on purpose. A key already
+sitting in your codebase must not be able to quietly gain the power to spend your balance
+without the code around it changing.
+
+To change what a key does: make a new one with the permissions you want, deploy it, then
+revoke the old one.
+
+### Getting the payout permission
+
+**Send payouts** can only be granted while payouts are enabled on your account. If the
+option is refused, contact support — a key whose stated power doesn't exist would be worse
+than being told no.
 
 ## Using a key
 

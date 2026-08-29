@@ -1,0 +1,122 @@
+---
+title: Sending payouts
+description: How money leaves your balance, and the controls around it.
+icon: ArrowUpRight
+---
+
+The Merchant API moves money both ways. Payments bring it in; payouts send it back out to
+somebody else — a supplier, a marketplace seller, a driver, a refund to a specific number.
+
+## Payouts are not withdrawals
+
+These get confused constantly, so we keep them strictly apart.
+
+| | Withdrawal | Payout |
+|---|---|---|
+| Money goes to | **Your own** account | **Somebody else's** number |
+| Started by | A person in the dashboard | Your backend, via the API |
+| Approved by | An admin, always | Nobody, unless it's large |
+| Lives at | Dashboard → Withdrawals | `POST /v1/payouts` |
+
+They ride the same rails and share nothing else. If you're moving your own balance to your
+own MoMo number, that's a withdrawal and it isn't in the API.
+
+## Same currency, always
+
+You pay out of a balance you hold, in the currency you hold it in. There's no conversion
+at payout time — XAF in your balance goes out as XAF.
+
+If you collect in several currencies you'll have a balance in each, and each has its own
+limits.
+
+## The controls
+
+Because a payout moves real money with no human in the loop, several things bound it.
+Every one of them is checked before your balance moves.
+
+<Steps>
+<Step>
+### The key must be allowed to
+
+Sending payouts is a separate permission from taking payments, chosen when a key is made
+and never widened afterwards. See [Scopes](/docs/authentication#scopes).
+</Step>
+<Step>
+### The amount must fit your limits
+
+A per-payout ceiling, a rolling daily ceiling, and a rolling weekly one. Check what's left
+with [`GET /v1/payout-limits/:currency`](/docs/api-reference/payout-limits).
+</Step>
+<Step>
+### You must actually have the money
+
+Checked against your live balance at the moment of the write, not a moment before — two
+payouts racing each other can never both spend the same funds.
+</Step>
+<Step>
+### Large amounts wait for a person
+
+Above your review threshold, a payout is funded and held rather than dispatched. It
+arrives with `awaitingReview: true` and stays `PENDING` until somebody releases it.
+</Step>
+</Steps>
+
+## Idempotency is mandatory
+
+`Idempotency-Key` is **required** on `POST /v1/payouts`, unlike on payments.
+
+The asymmetry is deliberate. A duplicated charge creates an invoice nobody has to pay — a
+tidy-up. A duplicated payout sends real money twice and cannot be recalled.
+
+```js
+// Derive the key from something stable in YOUR system, not a random value
+// per attempt — a retry has to produce the same key or it isn't a retry.
+const idempotencyKey = `payout-${supplierInvoiceId}`;
+```
+
+Send the same key again and you get the original payout back, with its original
+reference. Nothing moves twice.
+
+## When a payout fails
+
+A `FAILED` payout **keeps your money reserved**. It does not return automatically.
+
+When a dispatch fails we frequently cannot tell whether the network took the money.
+Returning funds that may already have gone is the one mistake with no way back — so the
+money stays put and a person resolves it, either by retrying the rail or returning it
+explicitly.
+
+You'll get a `payout.failed` webhook, and the payout will show why in `statusReason`.
+
+## A full example
+
+```js
+async function payoutToSupplier(invoice) {
+  // Fail early rather than half way through a batch.
+  const limits = await get('/v1/payout-limits/XAF');
+  if (!limits.configured) throw new Error('Payouts not enabled yet');
+  if (limits.remainingToday !== null && limits.remainingToday < invoice.amount) {
+    throw new Error('Would exceed today’s payout limit');
+  }
+
+  const payout = await post('/v1/payouts', {
+    amount: invoice.amount,
+    currency: 'XAF',
+    recipientPhone: invoice.supplierPhone,
+    recipientName: invoice.supplierName,
+    reference: invoice.id,
+  }, { 'Idempotency-Key': `payout-${invoice.id}` });
+
+  if (payout.awaitingReview) {
+    // Funded and queued, but a person has to release it. Don't retry —
+    // retrying with the same key returns this same payout.
+    await markAwaitingApproval(invoice.id, payout.reference);
+    return;
+  }
+
+  await markSent(invoice.id, payout.reference);
+}
+```
+
+Then handle `payout.paid` and `payout.failed` in your webhook endpoint rather than polling
+— see [Webhooks](/docs/guides/webhooks).

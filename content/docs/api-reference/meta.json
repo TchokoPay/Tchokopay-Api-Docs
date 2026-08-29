@@ -1,4 +1,14 @@
 {
   "title": "API Reference",
-  "pages": ["create-payment", "get-payment", "list-channels", "webhooks-endpoint"]
+  "pages": [
+    "create-payment",
+    "get-payment",
+    "list-channels",
+    "---Payouts---",
+    "create-payout",
+    "get-payout",
+    "payout-limits",
+    "---Setup---",
+    "webhooks-endpoint"
+  ]
 }

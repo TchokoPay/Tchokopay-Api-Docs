@@ -1,0 +1,95 @@
+---
+title: Payout limits
+description: GET /v1/payout-limits/:currency — what you may still send.
+icon: Gauge
+---
+
+<div className="not-prose flex flex-wrap items-center gap-2">
+  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono font-semibold">GET</span>
+  <code className="text-sm break-all">/v1/payout-limits/:currency</code>
+  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
+</div>
+
+What you're allowed to send in a currency, and how much of that allowance you've already
+used. Check it before a batch so you fail early rather than half way through.
+
+## Request
+
+<Tabs items={['cURL', 'Node.js', 'Python']}>
+<Tab value="cURL">
+```bash
+curl https://connect.tchokopay.com/v1/payout-limits/XAF \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+</Tab>
+<Tab value="Node.js">
+```js
+const res = await fetch('https://connect.tchokopay.com/v1/payout-limits/XAF', {
+  headers: { Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}` },
+});
+
+const limits = await res.json();
+if (!limits.configured) throw new Error('Payouts not enabled for this account yet');
+```
+</Tab>
+<Tab value="Python">
+```python
+response = requests.get(
+    "https://connect.tchokopay.com/v1/payout-limits/XAF",
+    headers={"Authorization": f"Bearer {payout_key}"},
+)
+limits = response.json()
+```
+</Tab>
+</Tabs>
+
+## Response
+
+`200 OK`
+
+```json
+{
+  "currency": "XAF",
+  "configured": true,
+  "perTransaction": 100000,
+  "perDay": 500000,
+  "perWeek": null,
+  "reviewThreshold": 20000,
+  "spentToday": 75000,
+  "spentThisWeek": 210000,
+  "remainingToday": 425000,
+  "remainingThisWeek": null
+}
+```
+
+| Field | Description |
+|---|---|
+| `configured` | `false` means no limit is set and you **cannot pay out** in this currency yet. |
+| `perTransaction` | The largest single payout allowed. `null` means no per-payout ceiling. |
+| `perDay` / `perWeek` | Rolling 24-hour and 7-day ceilings. `null` means no ceiling of that kind. |
+| `reviewThreshold` | Anything above this waits for a person instead of going out immediately. `null` means nothing is held. |
+| `spentToday` / `spentThisWeek` | What you've already committed in each window. |
+| `remainingToday` / `remainingThisWeek` | What's left. `null` where there's no ceiling. |
+
+<Callout>
+**No limit means no payouts.** A merchant with no configured limit can't send anything —
+that's the safe default for a capability that moves real money. Contact support to have
+yours set.
+</Callout>
+
+## What counts as spent
+
+Every payout that hasn't been declined: `PENDING`, `SENT`, `PAID` and `FAILED` all count
+against your allowance. Only `REJECTED` releases it, because only a rejection actually
+returns the money.
+
+`PENDING` counts precisely because it hasn't resolved yet — otherwise you could queue a
+hundred payouts under a daily cap and have them all clear.
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Unknown currency. |
+| `401` | Missing, invalid, or revoked API key. |
+| `403` | Your key doesn't have the **Send payouts** permission. |
