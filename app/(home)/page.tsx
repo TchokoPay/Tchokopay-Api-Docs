@@ -59,8 +59,12 @@ const capabilities = [
 ];
 
 export default function HomePage() {
+  // The nav floats over the hero, so the page starts behind it. The pull sits
+  // on this element rather than on the hero section: `overflow-x-hidden`
+  // computes overflow-y to `auto`, making this a clip box that ate the
+  // section’s negative margin and left a pale strip above the band.
   return (
-    <main className="flex flex-1 flex-col overflow-x-hidden">
+    <main className="-mt-14 flex flex-1 flex-col overflow-x-hidden">
       {/* ── Hero ─────────────────────────────────────────────────────
           One centred axis: notice, name, sentence, two ways in, and the rail
           holding the width at the bottom. It is the only committed-dark band
@@ -68,7 +72,11 @@ export default function HomePage() {
           theme tokens rather than restyling what sits inside it. */}
       <section className="hero-dark relative overflow-hidden">
         <div aria-hidden className="bg-grid-pattern pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-20 text-center sm:px-6 sm:py-28 lg:py-32">
+        {/* The nav floats inside the band, so the band has to start behind it:
+            the section is pulled up by the nav’s height and the top padding
+            gives it back, which keeps the pill sitting on the hero rather than
+            on the page’s own ground. */}
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pt-[8.5rem] pb-20 text-center sm:px-6 sm:pt-[10.5rem] sm:pb-28 lg:pt-[11.5rem] lg:pb-32">
           <FadeUp>
             <div className="border-fd-border flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border bg-white/5 px-4 py-2 text-sm">
               <span className="text-fd-muted-foreground">Live in Cameroon on MTN and Orange</span>

@@ -109,6 +109,19 @@ body {
   --color-fd-accent-foreground: #f2f5fc;
 
   color: var(--color-fd-foreground);
+
+  /* ...and it floats inside the band rather than spanning the top, which is
+     the shape the rest of the hero is cut to. */
+  top: 0.875rem;
+  padding-inline: 1rem;
+}
+
+#nd-home-layout #nd-nav > div {
+  max-width: 80rem;
+  margin-inline: auto;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 9999px;
+  background-color: rgb(8 11 20 / 0.66);
 }
 
 /* Subtle dot-grid used behind the landing hero — CSS only, no image asset,
