@@ -135,6 +135,46 @@ body {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 100%);
 }
 
+/* ── Nav labels that roll over ─────────────────────────────────────────
+   Two stacked copies of the word inside a one-line window; hovering the link
+   slides both up by exactly that line, so one leaves as the other arrives.
+   Keyed off the anchor rather than a group class because the anchor belongs to
+   fumadocs. */
+.slide {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  height: 1.25rem;
+  line-height: 1.25rem;
+}
+
+.slide > span {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide > span + span {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 100%;
+}
+
+#nd-nav a:hover .slide > span {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide > span {
+    transition: none;
+  }
+
+  /* Without the transition the swap is a jump between two identical words,
+     which is worse than not moving at all. */
+  #nd-nav a:hover .slide > span {
+    transform: none;
+  }
+}
+
 /* ── Entrance motion ───────────────────────────────────────────────────
    The resting state of everything here is VISIBLE. Motion runs from a
    hidden state to the natural one, so markup served without scripting —

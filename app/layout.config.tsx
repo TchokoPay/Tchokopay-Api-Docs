@@ -1,4 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { SlideLabel } from './slide-label';
 
 /**
  * Shared nav config between the landing page and the docs layout, so the
@@ -20,7 +21,7 @@ export const baseOptions: BaseLayoutProps = {
   },
   links: [
     {
-      text: 'Merchant Dashboard',
+      text: <SlideLabel>Merchant Dashboard</SlideLabel>,
       url: 'https://tchokopay.com/merchant/developers',
     },
   ],

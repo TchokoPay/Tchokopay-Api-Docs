@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { HighlightedCode } from './hero-code';
 import { FadeUp, FadeInView } from './animated';
-import { PaymentRail, CollectionShape } from './illustrations';
+import { CollectionShape } from './illustrations';
+import { CapabilityShelf } from './tiles';
 import { Wordmark } from './wordmark';
 
 /**
@@ -133,13 +134,13 @@ export default function HomePage() {
             </div>
           </FadeUp>
 
-          {/* Scaled to the page, the rail loses its detail on a phone — the
-              handset becomes a smudge. Below the breakpoint it holds a legible
-              width and the strip scrolls instead, bleeding to both edges so it
-              reads as more than the screen. */}
+          {/* Five tiles do not fit a phone, and shrinking them to fit would
+              cost the figures their detail. Below the breakpoint the shelf
+              scrolls at full size instead, bleeding to both edges so it reads
+              as more than the screen holds. */}
           <FadeUp delay={0.2} className="-mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full">
-            <div className="mt-16 overflow-x-auto px-4 pb-2 sm:mt-20 sm:overflow-visible sm:px-0 sm:pb-0">
-              <PaymentRail className="mx-auto w-full max-w-3xl min-w-[480px]" />
+            <div className="mt-16 overflow-x-auto px-4 pb-4 sm:mt-20 sm:overflow-visible sm:px-0">
+              <CapabilityShelf />
             </div>
           </FadeUp>
         </div>
