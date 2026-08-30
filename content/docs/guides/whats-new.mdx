@@ -14,8 +14,8 @@ charges plus a set of endpoints that tell you what we support.
 
 ## The names
 
-`POST /v1/payments` never took a payment — it created a checkout page and handed back a
-link. Nobody reading it could tell. So:
+The old names did not describe what they did — `POST /v1/payments` created a checkout
+page rather than taking a payment. The new ones say which direction money moves:
 
 | Before | Now |
 |---|---|
@@ -27,8 +27,8 @@ link. Nobody reading it could tell. So:
 | `GET /v1/channels` | `GET /v1/account/providers` |
 | `POST /v1/webhooks` | `PUT /v1/webhook` |
 
-Two verbs, everywhere. Money in is **collect**, money out is **disburse**, and no
-endpoint, field or error uses a third word for either.
+Money in is **collect**, money out is **disburse**. Every endpoint, field and error uses
+those two words and no others.
 
 ## What's new
 
@@ -84,6 +84,5 @@ no key rotation.
 
 ## If you're integrating today
 
-Build against the new names. The old ones are supported and will stay until nobody is
-using them — we log every call to them, so that's measured rather than guessed — but
-they're not what a new integration should be written against.
+Build against the new names. The old ones keep working and we will give you plenty of
+notice before anything changes, but the new names are what to write against.

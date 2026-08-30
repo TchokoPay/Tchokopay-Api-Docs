@@ -41,10 +41,8 @@ curl https://connect.tchokopay.com/v1/countries \
 | `phoneExample` | A correctly shaped number, for your own tests and placeholder text. |
 
 <Callout type="info">
-  `phoneDigits` and `phoneExample` are **absent** where we haven't confirmed the format
-  with the operators. An absent field means validate loosely; it never means "any length
-  is fine". We'd rather omit a format than publish one you'd build against and find
-  wrong.
+  `phoneDigits` and `phoneExample` are absent for some countries. Where they are missing,
+  skip the length check and let us validate the number — do not assume a length.
 </Callout>
 
 ## Caching this

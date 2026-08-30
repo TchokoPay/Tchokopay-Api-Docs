@@ -1,66 +1,53 @@
 ---
 title: Introduction
-description: Accept payments from your own backend with the TchokoPay Merchant API.
+description: Collect and send mobile money payments from your own systems.
 icon: House
 ---
 
-TchokoPay's Merchant API moves money in both directions from your own backend. You build
-the product; we are the rails underneath it.
+The TchokoPay API moves money in both directions. You call it from your backend; we
+handle the mobile money networks.
 
-**Collect** — charge a number directly from your own checkout, or send your customer to a hosted page carrying
-your branding, and get notified the moment it resolves. No payment UI to build, no mobile
-money integration to maintain.
-
-**Disburse** — move money out to any mobile money number, from your own systems.
-Whoever your business needs to pay, and however many of them.
-
-Both halves are built to be embedded in something else. An e-commerce platform settling
-its sellers, a payments app moving money for its own users, a fintech that would rather
-partner than negotiate with every operator itself — the API does not care what you are,
-and imposes no shape on your product.
+## What you can do
 
 <Cards>
-  <Card title="Quickstart" href="/docs/quickstart" description="Create your first payment in under five minutes." />
-  <Card title="Authentication" href="/docs/authentication" description="How API keys work and how to keep them safe." />
-  <Card title="API Reference" href="/docs/api-reference" description="Every endpoint, every field, every error." />
-  <Card title="Webhooks" href="/docs/guides/webhooks" description="Get notified instead of polling for status." />
-  <Card title="Sending payouts" href="/docs/guides/payouts" description="Move money out to any mobile money number." />
+  <Card title="Collect" description="Take a payment from a customer — either by charging their number directly, or by sending them to a hosted checkout page." />
+  <Card title="Disburse" description="Send money from your balance to any mobile money number." />
+  <Card title="Discover" description="Ask what countries, networks and amounts we support, instead of hardcoding them." />
 </Cards>
 
-## How it works
+## Two ways to collect
 
-<Steps>
-<Step>
-### Create a payment
+Both settle into the same balance and report through the same webhook. Pick per payment —
+you can use both.
 
-`POST /v1/collect/checkout` with an amount, a currency, and a description. You get back a
-`checkoutUrl`.
-</Step>
-<Step>
-### Redirect your customer
+| | Charge a number | Hosted checkout |
+|---|---|---|
+| | [`POST /v1/collect/charge`](/docs/api-reference/charge) | [`POST /v1/collect/checkout`](/docs/api-reference/create-checkout) |
+| Customer experience | Stays in your app. A prompt arrives on their phone. | Redirected to a TchokoPay page, then back. |
+| You collect | Their number and network | Nothing |
+| You build | Your own payment form | A redirect |
+| Available methods | Mobile money | Mobile money, card, Bitcoin, Lightning |
 
-Send them to `checkoutUrl`. They pick MTN MoMo, Orange Money, card, or Bitcoin/Lightning
-(where available) and complete the payment on TchokoPay's own hosted page — you never
-touch payment details.
-</Step>
-<Step>
-### Get notified
+If you already have the customer's phone number, charge it. If you'd rather not handle
+numbers or network selection, redirect.
 
-Either poll `GET /v1/collect/:reference`, or register a webhook once and get a signed
-`POST` the moment the payment succeeds or fails.
-</Step>
-</Steps>
+## Sending money
 
-## What you get
+[`POST /v1/disburse`](/docs/api-reference/create-disbursement) sends money from your
+TchokoPay balance to a mobile money number. You name the amount, the country, the network
+and the number; we deliver it and tell you when it lands.
 
-- **Multi-currency pricing** — price in any currency, settle net of fees in whatever your
-  customer actually paid with. See [Multi-currency](/docs/guides/multi-currency).
-- **Signed, replay-protected webhooks** — HMAC-signed, timestamp-bound, automatically
-  retried with backoff. See [Webhooks](/docs/guides/webhooks).
-- **Idempotent requests** — retry any `POST /v1/collect/checkout` call safely with an
-  `Idempotency-Key`. See [Idempotency & retries](/docs/guides/idempotency).
-- **Key-scoped access** — generate, rotate, and revoke API keys yourself from your
-  merchant dashboard. Revocation is immediate.
+Your balance is funded by what you collect. Disbursement is enabled per account — ask us
+if it isn't on yours yet.
+
+## Getting started
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="A working call in five minutes." />
+  <Card title="API keys" href="/docs/authentication" description="Create a key and choose what it can do." />
+  <Card title="API Reference" href="/docs/api-reference" description="Every endpoint, field and error." />
+  <Card title="Webhooks" href="/docs/guides/webhooks" description="Get told the moment something resolves." />
+</Cards>
 
 ## Base URL
 
@@ -68,11 +55,12 @@ Either poll `GET /v1/collect/:reference`, or register a webhook once and get a s
 https://connect.tchokopay.com
 ```
 
-This is the *only* domain the Merchant API is reachable from — it exposes nothing beyond
-the routes documented here.
+Every endpoint is under `/v1`. All requests need an `Authorization: Bearer` header.
 
-## Rollout
+## Where we operate
 
-Cameroon (MTN MoMo, Orange Money) at launch, with more countries opening over time. Check
-[`GET /v1/account/providers`](/docs/api-reference/account-providers) to see what's live for your
-account right now.
+Cameroon (MTN MoMo, Orange Money) today, with more countries opening over time.
+
+Rather than hardcoding that, call [`GET /v1/countries`](/docs/api-reference/countries) and
+[`GET /v1/account/providers`](/docs/api-reference/account-providers) — they tell you what
+is available to your account right now, and stay correct as we expand.

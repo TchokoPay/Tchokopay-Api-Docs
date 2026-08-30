@@ -1,30 +1,22 @@
 ---
-title: Sending payouts
-description: How money leaves your balance, and the controls around it.
+title: Disbursing
+description: Sending money from your balance to a mobile money number.
 icon: ArrowUpRight
 ---
 
-The Merchant API moves money both ways. Payments bring it in; payouts send it out again —
-to any mobile money number, for any reason your business has.
+`POST /v1/disburse` sends money from your TchokoPay balance to any mobile money number.
+Your balance is funded by what you collect.
 
-We do not model what the payment is for. A platform settling its sellers, an app paying
-out its users' balances, a lender disbursing a loan, a fintech routing its own customers'
-transfers through our rails rather than building operator integrations itself — all of it
-is the same call. You know what the money is for; we move it.
+## Disbursing is not withdrawing
 
-## Payouts are not withdrawals
-
-These get confused constantly, so we keep them strictly apart.
-
-| | Withdrawal | Payout |
+| | Withdrawal | Disbursement |
 |---|---|---|
 | Money goes to | **Your own** account | **Somebody else's** number |
-| Started by | A person in the dashboard | Your backend, via the API |
-| Approved by | An admin, always | Nobody, unless it's large |
-| Lives at | Dashboard → Withdrawals | `POST /v1/disburse` |
+| Started from | The dashboard, by a person | Your backend, via the API |
+| Where | Dashboard → Withdrawals | `POST /v1/disburse` |
 
-They ride the same rails and share nothing else. If you're moving your own balance to your
-own MoMo number, that's a withdrawal and it isn't in the API.
+Moving your own balance to your own number is a withdrawal, and it is not part of the
+API.
 
 ## Same currency, always
 
@@ -75,7 +67,7 @@ arrives with `awaitingReview: true` and stays `PENDING` until somebody releases 
 
 `Idempotency-Key` is **required** on `POST /v1/disburse`, unlike on payments.
 
-The asymmetry is deliberate. A duplicated charge creates an invoice nobody has to pay — a
+The two are not symmetrical. A duplicated charge creates an invoice nobody has to pay — a
 tidy-up. A duplicated payout sends real money twice and cannot be recalled.
 
 ```js

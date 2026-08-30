@@ -75,18 +75,17 @@ payout = response.json()
 | `REJECTED` | Declined during review. | Back in your balance |
 
 <Callout>
-**`SENT` is deliberately not `PAID`.** Mobile money networks confirm asynchronously, so
-the network accepting a payout and the recipient receiving it are different events —
-sometimes minutes apart. We don't collapse them, because your code will branch on this.
+**`SENT` is not `PAID`.** The network accepting a disbursement and the recipient
+receiving it are two different events, sometimes minutes apart. Treat `SENT` as in
+flight; wait for `PAID` before telling anyone the money arrived.
 </Callout>
 
 <Callout type="warn">
-A `FAILED` payout **keeps your money reserved**. It does not go back automatically.
+A `FAILED` disbursement **keeps your money reserved** — it is not returned automatically.
 
-That's deliberate: when a dispatch fails we often can't tell whether the network took the
-money or not, and returning funds we may already have sent is the one mistake with no way
-back. TchokoPay retries it or returns it explicitly, and you'll get a `payout.failed`
-webhook either way.
+We confirm with the network whether the money actually moved before releasing it, and
+then either complete it or return it to your balance. You get a `disburse.failed` webhook
+either way. Do not re-send a failed disbursement yourself; contact us instead.
 </Callout>
 
 ## Errors

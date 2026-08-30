@@ -1,68 +1,88 @@
 ---
-title: Authentication
-description: How API keys work and how to keep them safe.
+title: API keys
+description: Create a key, choose what it can do, and keep it safe.
 icon: KeyRound
 ---
 
-Every request to the Merchant API is authenticated with an API key, sent as a bearer
-token:
+Every request carries an API key as a bearer token:
 
 ```
 Authorization: Bearer tchoko_live_...
 ```
 
-There's no separate session or OAuth flow — the key *is* your credential.
+There is no OAuth flow and no session. The key is the credential.
 
-## Getting a key
+## Create a key
 
-Generate keys from your [merchant dashboard](https://tchokopay.com/merchant/developers) →
-**Developers** → **New API key**. Name it, tick what it's allowed to do, and copy the
-secret — the plaintext key is shown **exactly once**; TchokoPay only ever stores its hash
-and can't show it to you again. If you lose it, revoke it and generate a new one.
+<Steps>
+<Step>
+### Open Developers
 
-You can hold multiple keys at once — and you should, for the reason below.
+Sign in to your [merchant dashboard](https://tchokopay.com/merchant/developers) and go to
+**Developers**.
+</Step>
+<Step>
+### Click New API key
 
-## Scopes
+Give it a name you will recognise later — `production-backend`, `payouts-worker`,
+`reporting`. You will have several, and the name is how you tell them apart when deciding
+which to revoke.
+</Step>
+<Step>
+### Choose what it can do
 
-Every key carries a list of permissions, chosen when you create it.
+Tick one or more permissions. This is the important step — see below.
+</Step>
+<Step>
+### Copy the key
 
-| Permission | Lets the key | If it leaks |
+It is shown **once**. We store only a hash and cannot show it to you again. If you lose
+it, revoke it and make another.
+</Step>
+</Steps>
+
+## Choosing what a key can do
+
+Three permissions. Tick only what that key actually needs.
+
+| Permission | What it allows | Choose it for |
 |---|---|---|
-| **Collect** | Create charges and checkouts, read your own collections | Junk invoices nobody has to pay. Annoying, not expensive. |
-| **Disburse** | Move money out of your balance | **Somebody can spend your balance.** |
-| **Read only** | Read collections and disbursements. Creates and moves nothing. | Your data is readable. No money can move. |
-| **Read only** | Look at balances and history | Disclosure, but nothing moves. |
+| **Collect** | Charge numbers, create checkouts, read your collections | Anything that takes payments — your checkout, your storefront backend |
+| **Disburse** | Send money from your balance, read your disbursements | A payout worker, a settlement job |
+| **Read only** | Read collections and disbursements. Creates nothing, moves nothing. | Reporting, dashboards, reconciliation scripts |
 
-There is a third, **read only**, which reads collections and disbursements and creates
-nothing. Useful for a reporting job or a dashboard that should never be able to move
-money.
+They are independent, not levels. **Collect** does not include **Disburse**. **Read only**
+is not a weaker version of the others — it is a separate choice for something that should
+never create or move anything.
 
-They're independent, not a ladder. Collecting never implies disbursing, and *read only*
-grants no ability to create anything — it is an alternative on the read endpoints, not a
-level above them.
+### Which combination
+
+<Cards>
+  <Card title="Taking payments only" description="Collect. This is most integrations." />
+  <Card title="Taking and sending" description="Two separate keys — Collect on one, Disburse on the other. Not one key with both." />
+  <Card title="Reporting or analytics" description="Read only, on its own." />
+</Cards>
 
 <Callout type="warn">
-**Use two keys.** One with *collect* for whatever creates charges — often something
-public-facing. One with *disburse* on a locked-down server that nothing else touches.
+**Use a separate key for disbursement.** A key that can collect is low risk if it leaks —
+somebody creates invoices nobody has to pay. A key that can disburse is your balance.
 
-Then a leaked checkout key costs you nothing. One key holding both means the key in your
-storefront is also the key that can empty your balance.
+Put them in one key and the credential sitting in your checkout is also the credential
+that can empty your account.
 </Callout>
 
-### Scopes can't be widened
+### Disburse may not be available yet
 
-There's no endpoint to add a permission to an existing key, on purpose. A key already
-sitting in your codebase must not be able to quietly gain the power to spend your balance
-without the code around it changing.
+Disbursement is enabled per account. If the permission is greyed out, ask us to turn it on
+— we would rather refuse the option than issue a key whose stated power does not work.
 
-To change what a key does: make a new one with the permissions you want, deploy it, then
-revoke the old one.
+## Changing what a key does
 
-### Getting the payout permission
+You cannot add a permission to a key that already exists. To change what a key does:
+create a new key with the permissions you want, deploy it, then revoke the old one.
 
-**Disburse** can only be granted while disbursement is enabled on your account. If the
-option is refused, contact support — a key whose stated power doesn't exist would be worse
-than being told no.
+This is deliberate — a key already deployed in your systems should never quietly gain the
+ability to move money without the code around it changing.
 
 ## Using a key
 
@@ -88,29 +108,37 @@ import os
 import requests
 
 headers = {"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"}
-response = requests.get("https://connect.tchokopay.com/v1/account/providers", headers=headers)
+res = requests.get("https://connect.tchokopay.com/v1/account/providers", headers=headers)
 ```
 </Tab>
 </Tabs>
 
 <Callout type="warn">
-  Never embed your API key in frontend/client-side code, a mobile app, or a public repo.
-  Anyone with your key can create payments and read your payment history on your
-  account. Keep it server-side, in an environment variable or secret manager.
+  Keep keys server-side. Never in frontend code, a mobile app, or a public repository —
+  anyone holding your key can act as you.
 </Callout>
 
-## Revocation is immediate
+## Revoking
 
-Revoke a key from the dashboard and it stops working on your **very next** request — no
-propagation delay, no grace period. If your merchant account itself is suspended, every
-key on the account stops working immediately too, even ones you never explicitly revoked.
+Revoke from the dashboard and the key stops working on the very next request. No delay, no
+grace period.
+
+If your merchant account is suspended, every key on it stops working at the same moment.
+
+## Rate limits
+
+Each key starts at 30 requests per minute and 600 per hour. Limits are per key, so two
+integrations sharing one key share one allowance — give each its own.
+
+If you need more, we raise it per key. Write to
+[tech@tchokopay.com](mailto:tech@tchokopay.com) with the throughput you expect. See
+[rate limits](/docs/guides/errors-and-limits).
 
 ## Errors
 
-| Status | Meaning |
-|---|---|
-| `401` | Missing, malformed, invalid, or revoked API key. |
-| `403` | The key is valid, but your merchant account isn't approved, or the merchant API is temporarily disabled platform-wide. |
+| Status | `code` | Meaning |
+|---|---|---|
+| `401` | `UNAUTHORIZED` | Key missing, malformed, invalid, or revoked. |
+| `403` | `FORBIDDEN` | Key is valid but lacks the permission for this endpoint, or your account is not approved. |
 
-Both cases include a message telling you exactly what's wrong — see
-[Errors & rate limits](/docs/guides/errors-and-limits) for the full picture.
+The message names the missing permission, so you know which key to create.

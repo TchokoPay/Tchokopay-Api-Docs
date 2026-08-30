@@ -100,10 +100,9 @@ charge = res.json()
 | `description` | string | optional | Shown to the payer where the network supports it. |
 
 <Callout type="warn">
-  **We never guess the network.** `provider` is required, and if the number doesn't
-  match it we refuse rather than send the prompt somewhere it can't be answered. A
-  wrong guess sends a payment request to a phone that will never see it — you would
-  find out from a timeout, several minutes later.
+  `provider` is required, and we check it against the number. If they disagree, the
+  request is refused before any prompt is sent — so a mistyped number costs you a `400`
+  you can show your customer, not a payment that silently never arrives.
 </Callout>
 
 ## Response
@@ -148,13 +147,13 @@ than an error here — see [the status lifecycle](/docs/guides/status-lifecycle)
 ## Sending the same charge twice
 
 Send an `Idempotency-Key` and a repeat returns the original charge instead of prompting
-your customer a second time. Strongly recommended: without one, a retried request after
-a network blip means two prompts on somebody's phone for one order, and nothing cancels
-the first.
+your customer again. Strongly recommended — without one, a retry after a network blip
+puts two prompts on your customer's phone for a single order.
 
 ## How often you may prompt one number
 
-A phone can only receive so many payment prompts in a short window, whoever is sending
-them — a limit that protects the person holding it, not us. If you hit it you'll get a
-`FORBIDDEN` telling you so. In practice you'll only see it by retrying the same customer
-in a loop, which the idempotency key already avoids.
+There is a limit on how many prompts one number can receive in a short window. Exceed it
+and you get a `FORBIDDEN` saying so.
+
+You will not hit this in normal use — it takes retrying the same customer in a loop, which
+an `Idempotency-Key` already prevents.
