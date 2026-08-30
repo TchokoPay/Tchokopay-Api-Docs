@@ -8,10 +8,11 @@ import { Wordmark } from './wordmark';
 
 /**
  * One typographic rule runs through this page: monospace is machine
- * vocabulary — endpoints, statuses, references, and the two verbs the API is
- * built around — and the sans is everything a person says. It is why `collect`
- * and `disburse` are set in mono inside the headline: they are not English
- * words there, they are the names of two calls.
+ * vocabulary — endpoints, statuses, references, scopes — and the sans is
+ * everything a person says. The hero is a sentence a merchant would say about
+ * their own business, so it is sans throughout; `collect` and `disburse` only
+ * take mono further down, where they stop being verbs and start being the
+ * names of two calls.
  */
 
 const chargeSample = `curl -X POST https://connect.tchokopay.com/v1/collect/charge \\
@@ -79,7 +80,7 @@ export default function HomePage() {
         <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pt-[8.5rem] pb-20 text-center sm:px-6 sm:pt-[10.5rem] sm:pb-28 lg:pt-[11.5rem] lg:pb-32">
           <FadeUp>
             <div className="border-fd-border flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border bg-white/5 px-4 py-2 text-sm">
-              <span className="text-fd-muted-foreground">Live in Cameroon on MTN and Orange</span>
+              <span className="text-fd-muted-foreground">Live on MTN and Orange</span>
               <Link
                 href="/docs/api-reference/providers"
                 className="focus-visible:ring-fd-primary inline-flex items-center gap-1 font-medium transition-opacity hover:opacity-75 focus-visible:rounded-full focus-visible:ring-2 focus-visible:outline-none"
@@ -91,27 +92,20 @@ export default function HomePage() {
           </FadeUp>
 
           <FadeUp delay={0.05}>
-            {/* The gradient runs down the block so the second line settles;
-                the two verbs opt out of it, because they are the one thing
-                here that has to stay the brand's blue. */}
-            <h1 className="mt-7 max-w-3xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-4xl leading-[1.08] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-6xl">
-              Two verbs.
-              <br />
-              <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
-                collect
-              </span>{' '}
-              and{' '}
-              <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
-                disburse
-              </span>
-              .
+            {/* The gradient runs down the block so the second line settles. The
+                break is held only where there is room for it; on a phone the
+                sentence wraps on its own rather than breaking in a fixed
+                place that no longer suits the measure. */}
+            <h1 className="mt-7 max-w-4xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-[2rem] leading-[1.1] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-[3.4rem]">
+              Start collecting and disbursing
+              <br className="hidden sm:inline" /> payments in five minutes.
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.1}>
             <p className="text-fd-muted-foreground mx-auto mt-5 max-w-xl text-base leading-relaxed text-balance sm:text-lg">
-              Take mobile money payments and send them back out, from your own backend.
-              We hold the operator integrations so you don’t have to.
+              One API for mobile money across Africa. Money in, money out,
+              no operator integrations to build.
             </p>
           </FadeUp>
 

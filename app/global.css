@@ -84,10 +84,13 @@ body {
 
   color: var(--color-fd-foreground);
   background-color: #080b14;
+  /* `circle` rather than a percentage ellipse, so the glow stays round at every
+     viewport instead of stretching with the band. Two concentric passes: a
+     bright core behind the headline and a wide one to carry the falloff to the
+     edges without a visible rim. */
   background-image:
-    radial-gradient(78% 62% at 50% -12%, rgb(47 106 255 / 0.34), transparent 70%),
-    radial-gradient(46% 46% at 8% 4%, rgb(37 84 214 / 0.22), transparent 72%),
-    radial-gradient(52% 52% at 92% 8%, rgb(74 108 255 / 0.2), transparent 72%);
+    radial-gradient(circle 26rem at 50% 44%, rgb(47 106 255 / 0.38), transparent 70%),
+    radial-gradient(circle 55rem at 50% 44%, rgb(37 84 214 / 0.2), transparent 72%);
 }
 
 /* Fumadocs' nav sits above the hero and keeps the page theme, so in light mode
