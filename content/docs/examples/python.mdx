@@ -190,7 +190,7 @@ def webhook():
         mark_order_paid(event["invoiceReference"], event["settledAmount"], event["settledCurrency"])
     elif event_type == "collect.failed":
         mark_order_failed(event["invoiceReference"], event.get("failureReason"))
-    elif event_type == "disburse.paid":
+    elif event_type == "disburse.succeeded":
         mark_instruction_paid(event["reference"])
     elif event_type == "disburse.failed":
         mark_instruction_failed(event["reference"], event.get("statusReason"))

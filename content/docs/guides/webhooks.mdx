@@ -10,7 +10,7 @@ reaches a terminal state, signed so you can verify it actually came from TchokoP
 ## Registering an endpoint
 
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/webhook \
+curl -X PUT https://connect.tchokopay.com/v1/webhook \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "url": "https://mystore.example.com/webhooks/tchokopay" }'
@@ -70,24 +70,24 @@ Headers on every delivery:
 ```
 X-TchokoPay-Signature: sha256=<hex hmac>
 X-TchokoPay-Timestamp: 1785296852
-X-TchokoPay-Event: payment.succeeded
+X-TchokoPay-Event: collect.succeeded
 ```
 
 `X-TchokoPay-Event` names the event. There are five:
 
 | Event | When |
 |---|---|
-| `payment.succeeded` | A customer's payment cleared. |
-| `payment.failed` | A customer's payment didn't. |
-| `payout.sent` | A payout was handed to the network and accepted. |
-| `payout.paid` | A payout was confirmed delivered. |
-| `payout.failed` | A payout was refused by the network, or declined during review. |
+| `collect.succeeded` | A customer's payment cleared. |
+| `collect.failed` | A customer's payment didn't. |
+| `disburse.sent` | A disbursement was handed to the network and accepted. |
+| `disburse.succeeded` | A disbursement was confirmed delivered. |
+| `disburse.failed` | A disbursement was refused by the network, or declined during review. |
 
-Payout events carry a different body from payment events:
+Disbursement events carry a different body from collection events:
 
 ```json
 {
-  "event": "payout.paid",
+  "event": "disburse.succeeded",
   "data": {
     "reference": "PO-1787962449863-7B361B",
     "status": "PAID",
@@ -95,7 +95,7 @@ Payout events carry a different body from payment events:
     "currency": "XAF",
     "recipientPhone": "670000000",
     "recipientName": "Amina Njoya",
-    "merchantReference": "payout_4417",
+    "merchantReference": "supplier-invoice-4417",
     "providerReference": "MMH17797898332",
     "statusReason": null
   }
@@ -106,8 +106,42 @@ Everything else — the signature, the retries, the endpoint — is identical. O
 receives all five; branch on `X-TchokoPay-Event`.
 
 <Callout>
-`payout.sent` is not `payout.paid`. The first means the network accepted it, the second
-means the recipient has it. Do not tell your user the money has arrived on `payout.sent`.
+`disburse.sent` is not `disburse.succeeded`. The first means the network accepted it, the
+second means the recipient has it. Do not tell anyone the money arrived on
+`disburse.sent`.
+</Callout>
+
+## If you registered before August 2026
+
+Endpoints created before these names existed still receive the old ones —
+`payment.succeeded`, `payment.failed`, `payout.sent`, `payout.paid`,
+`payout.failed` — and will keep receiving them. **Your handler does not need
+changing.**
+
+Check which set you are on:
+
+```bash
+curl https://connect.tchokopay.com/v1/webhook \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+
+```json
+{ "url": "https://yourapp.com/webhooks/tchokopay", "isActive": true, "events": "legacy" }
+```
+
+To move, deploy a handler that reads the new names, then switch:
+
+```bash
+curl -X PUT https://connect.tchokopay.com/v1/webhook \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://yourapp.com/webhooks/tchokopay", "events": "v2" }'
+```
+
+<Callout type="warn">
+  Switching stops the old names arriving immediately, and nothing will raise an error if
+  your handler still expects them — it will simply stop matching. Deploy the new handler
+  first. Re-registering also issues a new signing secret, so update that at the same time.
 </Callout>
 
 ## Verifying the signature

@@ -69,12 +69,14 @@ Nothing to change.
 
 ## Webhooks
 
-Endpoints registered before this change keep receiving `payment.succeeded` and
-`payment.failed`. New endpoints get `collect.succeeded` and `collect.failed`, plus the
-`disburse.*` events.
+Endpoints registered before this change keep receiving the old names —
+`payment.succeeded`, `payment.failed`, `payout.sent`, `payout.paid`, `payout.failed`.
+New ones get `collect.succeeded`, `collect.failed`, `disburse.sent`,
+`disburse.succeeded` and `disburse.failed`.
 
-Your handler keeps working. Move when you're ready — and if you'd like to test the new
-names first, register a second endpoint and point it at a staging handler.
+Your handler keeps working with no change. When you want the new names, deploy a handler
+that reads them and then re-register with `"events": "v2"` — see
+[webhooks](/docs/guides/webhooks).
 
 ## Rate limits can be raised
 

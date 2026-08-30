@@ -179,7 +179,7 @@ app.post('/webhooks/tchokopay', express.raw({ type: 'application/json' }), (req,
     case 'collect.failed':
       markOrderFailed(event.invoiceReference, event.failureReason);
       break;
-    case 'disburse.paid':
+    case 'disburse.succeeded':
       markInstructionPaid(event.reference);
       break;
     case 'disburse.failed':

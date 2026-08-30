@@ -88,7 +88,7 @@ Returning funds that may already have gone is the one mistake with no way back �
 money stays put and a person resolves it, either by retrying the rail or returning it
 explicitly.
 
-You'll get a `payout.failed` webhook, and the payout will show why in `statusReason`.
+You'll get a `disburse.failed` webhook, and the disbursement will show why in `statusReason`.
 
 ## A full example
 
@@ -116,7 +116,7 @@ async function sendPayout(instruction) {
     'Idempotency-Key': `payout-${instruction.id}`,
   });
 
-  if (payout.awaitingReview) {
+  if (disburse.sentReview) {
     // Funded and queued, but a person has to release it. Do not retry —
     // the same key returns this same payout.
     await markAwaitingApproval(instruction.id, payout.reference);
@@ -127,5 +127,5 @@ async function sendPayout(instruction) {
 }
 ```
 
-Then handle `payout.paid` and `payout.failed` in your webhook endpoint rather than polling
+Then handle `disburse.succeeded` and `disburse.failed` in your webhook endpoint rather than polling
 — see [Webhooks](/docs/guides/webhooks).
