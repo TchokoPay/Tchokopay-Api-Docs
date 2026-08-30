@@ -61,60 +61,55 @@ body {
   max-width: 100%;
 }
 
-/* ── The hero, as one dark band ────────────────────────────────────────
-   The hero is committed dark whatever theme the reader is in: it is the one
-   place on the site that gets to be a poster rather than a document, and the
-   blue only reads as brand at that depth.
+/* ── The landing page, as one charcoal surface ─────────────────────────
+   The marketing page is committed dark whatever theme the reader is in — it is
+   the one place on the site that gets to be a poster rather than a document —
+   and it is a single ground from the nav to the wordmark, so nothing seams.
 
-   Rather than dark-specific markup on every element inside it, the fumadocs
-   tokens are redefined for this subtree. Everything already built against them
-   — the rail illustration, the muted copy, the bordered card — comes out right
-   with no changes of its own. `--hero-accent` is separate from
-   `--color-fd-primary` because the two do different jobs on a dark ground:
-   one is a ground that must carry white text, the other is text that must
-   stay legible against the ground. */
-.hero-dark {
-  --color-fd-foreground: #f2f5fc;
-  --color-fd-muted-foreground: #9aa6c2;
+   Rather than dark-specific markup on every element, the fumadocs tokens are
+   redefined for this subtree; everything already built against them comes out
+   right unchanged. `--accent-solid` is separate from `--color-fd-primary`
+   because the two do different jobs on a dark ground: one is a ground that has
+   to carry white text, the other is text that has to stay legible against it.
+   Scoped to `#nd-home-layout`, which fumadocs puts on the marketing layout
+   only, so the docs keep their own light/dark behaviour. */
+#nd-home-layout {
+  --color-fd-background: #0d0e11;
+  --color-fd-foreground: #f2f4f8;
+  --color-fd-muted-foreground: #99a1b3;
   --color-fd-primary: #7fa5ff;
-  --color-fd-border: rgb(255 255 255 / 0.14);
-  --color-fd-card: rgb(255 255 255 / 0.04);
-  --hero-accent: #3b6dff;
-  --hero-accent-hover: #2f5ce6;
+  --color-fd-border: rgb(255 255 255 / 0.1);
+  --color-fd-card: rgb(255 255 255 / 0.03);
+  --color-fd-secondary: rgb(255 255 255 / 0.07);
+  --color-fd-secondary-foreground: #f2f4f8;
+  --color-fd-muted: rgb(255 255 255 / 0.06);
+  --color-fd-accent: rgb(255 255 255 / 0.09);
+  --color-fd-accent-foreground: #f2f4f8;
+  --accent-solid: #3b6dff;
+  --accent-solid-hover: #2f5ce6;
 
+  background-color: var(--color-fd-background);
   color: var(--color-fd-foreground);
-  background-color: #080b14;
-  /* `circle` rather than a percentage ellipse, so the glow stays round at every
-     viewport instead of stretching with the band. Two concentric passes: a
-     bright core behind the headline and a wide one to carry the falloff to the
-     edges without a visible rim. */
-  background-image:
-    radial-gradient(circle 26rem at 50% 44%, rgb(47 106 255 / 0.38), transparent 70%),
-    radial-gradient(circle 55rem at 50% 44%, rgb(37 84 214 / 0.2), transparent 72%);
 }
 
-/* Fumadocs' nav sits above the hero and keeps the page theme, so in light mode
-   a pale bar met a dark band with a hard seam across the top of the page. The
-   nav takes the hero's ground instead — scoped to `#nd-home-layout`, which
-   fumadocs puts on the marketing layout only, so the docs nav is untouched.
-   Only the tokens are redefined; the bar's own `bg-fd-background/80` and
-   backdrop blur then do the work, and it stays glass over the lighter sections
-   further down. */
+/* Shiki writes both palettes as custom properties and fumadocs picks between
+   them with the `.dark` class on the document. This page is dark without that
+   class ever being set, so a reader in light mode would get white code blocks
+   on a charcoal page. Take the dark half explicitly here. */
+#nd-home-layout figure.shiki {
+  background-color: var(--shiki-dark-bg);
+}
+
+#nd-home-layout .shiki code span,
+#nd-home-layout code.shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}
+
+/* The nav is a pill floating inside the page rather than a bar spanning the
+   top, and it carries no fill of its own — the blur alone separates it from
+   whatever scrolls beneath. */
 #nd-home-layout #nd-nav {
-  --color-fd-background: #080b14;
-  --color-fd-foreground: #f2f5fc;
-  --color-fd-muted-foreground: #9aa6c2;
-  --color-fd-border: rgb(255 255 255 / 0.12);
-  --color-fd-secondary: rgb(255 255 255 / 0.08);
-  --color-fd-secondary-foreground: #f2f5fc;
-  --color-fd-muted: rgb(255 255 255 / 0.06);
-  --color-fd-accent: rgb(255 255 255 / 0.1);
-  --color-fd-accent-foreground: #f2f5fc;
-
-  color: var(--color-fd-foreground);
-
-  /* ...and it floats inside the band rather than spanning the top, which is
-     the shape the rest of the hero is cut to. */
   top: 0.875rem;
   padding-inline: 1rem;
 }
@@ -124,7 +119,24 @@ body {
   margin-inline: auto;
   border: 1px solid var(--color-fd-border);
   border-radius: 9999px;
-  background-color: rgb(8 11 20 / 0.66);
+  background-color: transparent;
+}
+
+/* The glow behind the hero: one circle, evenly centred, fading out in even
+   steps. `circle` rather than a percentage ellipse keeps it round at any
+   viewport instead of stretching with the band, and the last stop is the same
+   blue at zero alpha rather than `transparent` — `transparent` is transparent
+   BLACK, and interpolating toward it drags a grey cast through the middle of
+   the fade, which is exactly what stops a glow reading as uniformly round. */
+.hero-glow {
+  background-image: radial-gradient(
+    circle 40rem at 50% 40%,
+    rgb(59 109 255 / 0.2) 0%,
+    rgb(59 109 255 / 0.13) 26%,
+    rgb(59 109 255 / 0.06) 50%,
+    rgb(59 109 255 / 0.02) 66%,
+    rgb(59 109 255 / 0) 78%
+  );
 }
 
 /* ── Nav labels that roll over ─────────────────────────────────────────

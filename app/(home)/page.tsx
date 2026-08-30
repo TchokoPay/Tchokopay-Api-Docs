@@ -72,7 +72,7 @@ export default function HomePage() {
           holding the width at the bottom. It is the only committed-dark band
           on the site — see `.hero-dark` in global.css, which redefines the
           theme tokens rather than restyling what sits inside it. */}
-      <section className="hero-dark relative overflow-hidden">
+      <section className="hero-glow border-fd-border relative overflow-hidden border-b">
         {/* The nav floats inside the band, so the band has to start behind it:
             the section is pulled up by the nav’s height and the top padding
             gives it back, which keeps the pill sitting on the hero rather than
@@ -103,7 +103,7 @@ export default function HomePage() {
           </FadeUp>
 
           <FadeUp delay={0.1}>
-            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-xl text-base leading-relaxed text-balance sm:text-lg">
+            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed text-balance sm:text-lg">
               One API for mobile money across Africa. Money in, money out,
               no operator integrations to build.
             </p>
@@ -113,14 +113,14 @@ export default function HomePage() {
             <div className="xs:w-auto xs:flex-row xs:items-center mt-9 flex w-full flex-col items-stretch justify-center gap-3">
               <Link
                 href="/docs/quickstart"
-                className="focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full bg-[var(--hero-accent)] px-7 py-3 text-sm font-medium text-white shadow-[0_0_44px_-10px_var(--hero-accent)] transition duration-200 hover:bg-[var(--hero-accent-hover)] hover:shadow-[0_0_56px_-6px_var(--hero-accent)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080b14] focus-visible:outline-none active:scale-[0.98]"
+                className="focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent-solid)] px-7 py-3 text-sm font-medium text-white shadow-[0_0_44px_-10px_var(--accent-solid)] transition duration-200 hover:bg-[var(--accent-solid-hover)] hover:shadow-[0_0_56px_-6px_var(--accent-solid)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-fd-background focus-visible:outline-none active:scale-[0.98]"
               >
                 Start building
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/docs/api-reference/charge"
-                className="border-fd-border focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full border bg-white/5 px-7 py-3 font-mono text-sm transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080b14] focus-visible:outline-none"
+                className="border-fd-border focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full border bg-white/5 px-7 py-3 font-mono text-sm transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-fd-background focus-visible:outline-none"
               >
                 API reference
               </Link>
@@ -311,14 +311,14 @@ export default function HomePage() {
             <div className="sm:w-auto sm:flex-row sm:items-center mt-8 flex w-full flex-col items-stretch justify-center gap-3">
               <Link
                 href="/docs/quickstart"
-                className="bg-fd-primary text-fd-primary-foreground focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
+                className="focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent-solid)] px-6 py-3 text-sm font-medium text-white transition duration-200 hover:bg-[var(--accent-solid-hover)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
               >
                 Read the quickstart
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="https://tchokopay.com/merchant/developers"
-                className="border-fd-border hover:bg-fd-secondary focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                className="border-fd-border focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full border bg-white/5 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 Get an API key
               </Link>
