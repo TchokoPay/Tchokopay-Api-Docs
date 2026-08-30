@@ -7,7 +7,7 @@ icon: ArrowUpRight
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
   <code className="text-sm break-all">/v1/disburse</code>
-  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
+  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Disburse</span>
 </div>
 
 Sends money from your TchokoPay balance to any mobile money number.
@@ -21,7 +21,7 @@ happens in the dashboard. This pays **a third party** and cannot be undone once 
 network has it.
 </Callout>
 
-Requires a key with the **Send payouts** permission. See [Scopes](/docs/authentication#scopes).
+Requires a key with the **Disburse** permission. See [Scopes](/docs/authentication).
 
 ## Request
 
@@ -38,7 +38,7 @@ curl -X POST https://connect.tchokopay.com/v1/disburse \
     "recipientPhone": "670000000",
     "recipientName": "Amina Njoya",
     "payoutProviderCode": "mtn_cm",
-    "reference": "payout_4417"
+    "reference": "supplier-invoice-4417"
   }'
 ```
 </Tab>
@@ -49,7 +49,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/disburse', {
   headers: {
     Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}`,
     'Content-Type': 'application/json',
-    // Required, not optional. Same key twice returns the same payout.
+    // Required, not optional. Same key twice returns the same disbursement.
     'Idempotency-Key': 'payout-4417-attempt-1',
   },
   body: JSON.stringify({
@@ -58,11 +58,11 @@ const res = await fetch('https://connect.tchokopay.com/v1/disburse', {
     recipientPhone: '670000000',
     recipientName: 'Amina Njoya',
     payoutProviderCode: 'mtn_cm',
-    reference: 'payout_4417',
+    reference: 'supplier-invoice-4417',
   }),
 });
 
-const payout = await res.json();
+const disbursement = await res.json();
 ```
 </Tab>
 <Tab value="Python">
@@ -70,7 +70,7 @@ const payout = await res.json();
 response = requests.post(
     "https://connect.tchokopay.com/v1/disburse",
     headers={
-        "Authorization": f"Bearer {payout_key}",
+        "Authorization": f"Bearer {disburse_key}",
         "Idempotency-Key": "payout-4417-attempt-1",
     },
     json={
@@ -79,7 +79,7 @@ response = requests.post(
         "recipientPhone": "670000000",
         "recipientName": "Amina Njoya",
         "payoutProviderCode": "mtn_cm",
-        "reference": "payout_4417",
+        "reference": "supplier-invoice-4417",
     },
 )
 payout = response.json()
@@ -103,7 +103,7 @@ payout = response.json()
 
 | Header | Required | Description |
 |---|---|---|
-| `Authorization` | **required** | `Bearer tchoko_live_...` on a key with the **Send payouts** permission. |
+| `Authorization` | **required** | `Bearer tchoko_live_...` on a key with the **Disburse** permission. |
 | `Content-Type` | **required** | `application/json` |
 | `Idempotency-Key` | **required** | Any string you choose, max 200 characters. |
 
@@ -148,7 +148,7 @@ recalled. Send the same key again and you get the same payout back, never a seco
 |---|---|
 | `400` | No `Idempotency-Key`, unknown currency, non-positive amount, or **not enough balance** — the message tells you what you have and what was needed. Also returned when payouts aren't enabled on the platform. |
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Your key doesn't have the **Send payouts** permission, no payout limit is configured for that currency, or the amount is over one of your limits. The message says which. |
+| `403` | Your key doesn't have the **Disburse** permission, no payout limit is configured for that currency, or the amount is over one of your limits. The message says which. |
 | `429` | Rate limit hit — see [Errors & rate limits](/docs/guides/errors-and-limits). |
 
 ## What happens next
