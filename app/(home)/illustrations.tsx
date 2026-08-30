@@ -40,17 +40,17 @@ export function PaymentRail({ className }: { className?: string }) {
         <rect x="44" y="86" width="76" height="128" rx="6" fill="currentColor" fillOpacity="0.03" />
         <line x1="68" y1="79" x2="96" y2="79" stroke="currentColor" strokeOpacity="0.3" strokeWidth="2" strokeLinecap="round" />
 
-        {/* The prompt, arriving. */}
-        <motion.g
-          initial={still ? false : { opacity: 0, y: 6 }}
-          animate={still ? undefined : { opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
+        {/* The prompt, arriving. A CSS animation rather than a motion value:
+            framer writes `initial` into the markup as a real SVG attribute, so
+            this group shipped as `<g opacity="0">` and stayed invisible both
+            without JavaScript and, because `animate` was then withheld, for
+            anyone browsing with reduced motion. `.rise` rests visible. */}
+        <g className="rise" style={{ animationDelay: '1.1s' }}>
           <rect x="54" y="104" width="56" height="8" rx="4" fill="currentColor" fillOpacity="0.14" />
           <rect x="54" y="120" width="38" height="8" rx="4" fill="currentColor" fillOpacity="0.09" />
           <rect x="54" y="150" width="56" height="20" rx="6" className="fill-fd-primary" fillOpacity="0.9" />
           <rect x="66" y="158" width="32" height="4" rx="2" fill="white" fillOpacity="0.85" />
-        </motion.g>
+        </g>
       </g>
 
       {/* ── The merchant ────────────────────────────────────────────── */}
@@ -78,7 +78,7 @@ export function PaymentRail({ className }: { className?: string }) {
         r="5"
         cy="150"
         fill="#FFCC00"
-        initial={{ cx: 140, opacity: 0 }}
+        initial={{ cx: 285, opacity: 1 }}
         animate={still ? { cx: 285, opacity: 1 } : { cx: [140, 420], opacity: [0, 1, 1, 0] }}
         transition={still ? { duration: 0 } : { duration: 2.6, times: [0, 0.12, 0.88, 1], repeat: Infinity, repeatDelay: 1.6, ease: 'linear' }}
       />
@@ -88,7 +88,7 @@ export function PaymentRail({ className }: { className?: string }) {
         r="5"
         cy="150"
         fill="#FF7900"
-        initial={{ cx: 420, opacity: 0 }}
+        initial={{ cx: 285, opacity: 0 }}
         animate={still ? { cx: 285, opacity: 0 } : { cx: [420, 140], opacity: [0, 1, 1, 0] }}
         transition={still ? { duration: 0 } : { duration: 2.6, times: [0, 0.12, 0.88, 1], repeat: Infinity, repeatDelay: 1.6, delay: 2.1, ease: 'linear' }}
       />

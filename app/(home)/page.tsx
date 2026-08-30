@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { HighlightedCode } from './hero-code';
-import { Stagger, FadeUp, FadeInView } from './animated';
+import { FadeUp, FadeInView } from './animated';
 import { PaymentRail, CollectionShape } from './illustrations';
 import { Wordmark } from './wordmark';
 
@@ -61,63 +61,79 @@ const capabilities = [
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col overflow-x-hidden">
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="border-fd-border relative border-b">
+      {/* ── Hero ─────────────────────────────────────────────────────
+          One centred axis: notice, name, sentence, two ways in, and the rail
+          holding the width at the bottom. It is the only committed-dark band
+          on the site — see `.hero-dark` in global.css, which redefines the
+          theme tokens rather than restyling what sits inside it. */}
+      <section className="hero-dark relative overflow-hidden">
         <div aria-hidden className="bg-grid-pattern pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:py-28">
-          <Stagger className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
-            <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-              <FadeUp>
-                <span className="text-fd-muted-foreground font-mono text-[0.7rem] tracking-[0.18em] uppercase">
-                  Merchant API
-                </span>
-              </FadeUp>
-
-              <FadeUp delay={0.05}>
-                <h1 className="mt-5 text-4xl leading-[1.06] font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem]">
-                  Two verbs.
-                  <br />
-                  <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
-                    collect
-                  </span>{' '}
-                  and{' '}
-                  <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
-                    disburse
-                  </span>
-                  .
-                </h1>
-              </FadeUp>
-
-              <FadeUp delay={0.1}>
-                <p className="text-fd-muted-foreground mt-6 max-w-md text-base leading-relaxed text-balance sm:text-lg">
-                  Take mobile money payments and send them back out, from your own backend.
-                  We hold the operator integrations so you don’t have to.
-                </p>
-              </FadeUp>
-
-              <FadeUp delay={0.15}>
-                <div className="xs:w-auto xs:flex-row xs:items-center mt-9 flex w-full flex-col items-stretch gap-3">
-                  <Link
-                    href="/docs/quickstart"
-                    className="bg-fd-primary text-fd-primary-foreground focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
-                  >
-                    Start building
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    href="/docs/api-reference/charge"
-                    className="border-fd-border hover:bg-fd-secondary focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-lg border px-5 py-2.5 font-mono text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  >
-                    API reference
-                  </Link>
-                </div>
-              </FadeUp>
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-20 text-center sm:px-6 sm:py-28 lg:py-32">
+          <FadeUp>
+            <div className="border-fd-border flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border bg-white/5 px-4 py-2 text-sm">
+              <span className="text-fd-muted-foreground">Live in Cameroon on MTN and Orange</span>
+              <Link
+                href="/docs/api-reference/providers"
+                className="focus-visible:ring-fd-primary inline-flex items-center gap-1 font-medium transition-opacity hover:opacity-75 focus-visible:rounded-full focus-visible:ring-2 focus-visible:outline-none"
+              >
+                See coverage
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
+          </FadeUp>
 
-            <FadeUp delay={0.2} className="w-full">
-              <PaymentRail className="text-fd-foreground mx-auto w-full max-w-xl" />
-            </FadeUp>
-          </Stagger>
+          <FadeUp delay={0.05}>
+            {/* The gradient runs down the block so the second line settles;
+                the two verbs opt out of it, because they are the one thing
+                here that has to stay the brand's blue. */}
+            <h1 className="mt-7 max-w-3xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-4xl leading-[1.08] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-6xl">
+              Two verbs.
+              <br />
+              <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
+                collect
+              </span>{' '}
+              and{' '}
+              <span className="text-fd-primary font-mono text-[0.82em] font-medium tracking-tight">
+                disburse
+              </span>
+              .
+            </h1>
+          </FadeUp>
+
+          <FadeUp delay={0.1}>
+            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-xl text-base leading-relaxed text-balance sm:text-lg">
+              Take mobile money payments and send them back out, from your own backend.
+              We hold the operator integrations so you don’t have to.
+            </p>
+          </FadeUp>
+
+          <FadeUp delay={0.15}>
+            <div className="xs:w-auto xs:flex-row xs:items-center mt-9 flex w-full flex-col items-stretch justify-center gap-3">
+              <Link
+                href="/docs/quickstart"
+                className="focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full bg-[var(--hero-accent)] px-7 py-3 text-sm font-medium text-white shadow-[0_0_44px_-10px_var(--hero-accent)] transition duration-200 hover:bg-[var(--hero-accent-hover)] hover:shadow-[0_0_56px_-6px_var(--hero-accent)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080b14] focus-visible:outline-none active:scale-[0.98]"
+              >
+                Start building
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/docs/api-reference/charge"
+                className="border-fd-border focus-visible:ring-fd-primary inline-flex items-center justify-center gap-2 rounded-full border bg-white/5 px-7 py-3 font-mono text-sm transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080b14] focus-visible:outline-none"
+              >
+                API reference
+              </Link>
+            </div>
+          </FadeUp>
+
+          {/* Scaled to the page, the rail loses its detail on a phone — the
+              handset becomes a smudge. Below the breakpoint it holds a legible
+              width and the strip scrolls instead, bleeding to both edges so it
+              reads as more than the screen. */}
+          <FadeUp delay={0.2} className="-mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full">
+            <div className="mt-16 overflow-x-auto px-4 pb-2 sm:mt-20 sm:overflow-visible sm:px-0 sm:pb-0">
+              <PaymentRail className="mx-auto w-full max-w-3xl min-w-[480px]" />
+            </div>
+          </FadeUp>
         </div>
       </section>
 
@@ -293,14 +309,14 @@ export default function HomePage() {
             <div className="sm:w-auto sm:flex-row sm:items-center mt-8 flex w-full flex-col items-stretch justify-center gap-3">
               <Link
                 href="/docs/quickstart"
-                className="bg-fd-primary text-fd-primary-foreground focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
+                className="bg-fd-primary text-fd-primary-foreground focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
               >
                 Read the quickstart
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="https://tchokopay.com/merchant/developers"
-                className="border-fd-border hover:bg-fd-secondary focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                className="border-fd-border hover:bg-fd-secondary focus-visible:ring-fd-primary focus-visible:ring-offset-fd-background inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 Get an API key
               </Link>

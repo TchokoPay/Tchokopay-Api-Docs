@@ -61,6 +61,56 @@ body {
   max-width: 100%;
 }
 
+/* ── The hero, as one dark band ────────────────────────────────────────
+   The hero is committed dark whatever theme the reader is in: it is the one
+   place on the site that gets to be a poster rather than a document, and the
+   blue only reads as brand at that depth.
+
+   Rather than dark-specific markup on every element inside it, the fumadocs
+   tokens are redefined for this subtree. Everything already built against them
+   — the rail illustration, the muted copy, the bordered card — comes out right
+   with no changes of its own. `--hero-accent` is separate from
+   `--color-fd-primary` because the two do different jobs on a dark ground:
+   one is a ground that must carry white text, the other is text that must
+   stay legible against the ground. */
+.hero-dark {
+  --color-fd-foreground: #f2f5fc;
+  --color-fd-muted-foreground: #9aa6c2;
+  --color-fd-primary: #7fa5ff;
+  --color-fd-border: rgb(255 255 255 / 0.14);
+  --color-fd-card: rgb(255 255 255 / 0.04);
+  --hero-accent: #3b6dff;
+  --hero-accent-hover: #2f5ce6;
+
+  color: var(--color-fd-foreground);
+  background-color: #080b14;
+  background-image:
+    radial-gradient(78% 62% at 50% -12%, rgb(47 106 255 / 0.34), transparent 70%),
+    radial-gradient(46% 46% at 8% 4%, rgb(37 84 214 / 0.22), transparent 72%),
+    radial-gradient(52% 52% at 92% 8%, rgb(74 108 255 / 0.2), transparent 72%);
+}
+
+/* Fumadocs' nav sits above the hero and keeps the page theme, so in light mode
+   a pale bar met a dark band with a hard seam across the top of the page. The
+   nav takes the hero's ground instead — scoped to `#nd-home-layout`, which
+   fumadocs puts on the marketing layout only, so the docs nav is untouched.
+   Only the tokens are redefined; the bar's own `bg-fd-background/80` and
+   backdrop blur then do the work, and it stays glass over the lighter sections
+   further down. */
+#nd-home-layout #nd-nav {
+  --color-fd-background: #080b14;
+  --color-fd-foreground: #f2f5fc;
+  --color-fd-muted-foreground: #9aa6c2;
+  --color-fd-border: rgb(255 255 255 / 0.12);
+  --color-fd-secondary: rgb(255 255 255 / 0.08);
+  --color-fd-secondary-foreground: #f2f5fc;
+  --color-fd-muted: rgb(255 255 255 / 0.06);
+  --color-fd-accent: rgb(255 255 255 / 0.1);
+  --color-fd-accent-foreground: #f2f5fc;
+
+  color: var(--color-fd-foreground);
+}
+
 /* Subtle dot-grid used behind the landing hero — CSS only, no image asset,
    themed for both light/dark via currentColor + low opacity. */
 .bg-grid-pattern {

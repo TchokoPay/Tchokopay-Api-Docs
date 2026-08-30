@@ -37,15 +37,6 @@ export function FadeUp({
   );
 }
 
-/**
- * Kept so the hero reads as one group. It no longer orchestrates anything —
- * each child owns its own delay — but grouping them is still what the markup
- * means.
- */
-export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={className}>{children}</div>;
-}
-
 /** Reveals as it scrolls into view, and is simply present if it cannot. */
 export function FadeInView({
   children,
