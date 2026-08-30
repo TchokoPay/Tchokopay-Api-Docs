@@ -1,12 +1,12 @@
 ---
-title: Payout limits
-description: GET /v1/payout-limits/:currency — what you may still send.
+title: Your disburse limits
+description: GET /v1/account/disburse-limits/:currency — what you may still send.
 icon: Gauge
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono font-semibold">GET</span>
-  <code className="text-sm break-all">/v1/payout-limits/:currency</code>
+  <code className="text-sm break-all">/v1/account/disburse-limits/:currency</code>
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
 </div>
 
@@ -18,13 +18,13 @@ used. Check it before a batch so you fail early rather than half way through.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl https://connect.tchokopay.com/v1/payout-limits/XAF \
+curl https://connect.tchokopay.com/v1/account/disburse-limits/XAF \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
-const res = await fetch('https://connect.tchokopay.com/v1/payout-limits/XAF', {
+const res = await fetch('https://connect.tchokopay.com/v1/account/disburse-limits/XAF', {
   headers: { Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}` },
 });
 
@@ -35,7 +35,7 @@ if (!limits.configured) throw new Error('Payouts not enabled for this account ye
 <Tab value="Python">
 ```python
 response = requests.get(
-    "https://connect.tchokopay.com/v1/payout-limits/XAF",
+    "https://connect.tchokopay.com/v1/account/disburse-limits/XAF",
     headers={"Authorization": f"Bearer {payout_key}"},
 )
 limits = response.json()

@@ -28,15 +28,22 @@ Every key carries a list of permissions, chosen when you create it.
 
 | Permission | Lets the key | If it leaks |
 |---|---|---|
-| **Take payments** | Create charges, read your own payments | Junk invoices nobody has to pay. Annoying, not expensive. |
-| **Send payouts** | Move money out of your balance | **Somebody can spend your balance.** |
+| **Collect** | Create charges and checkouts, read your own collections | Junk invoices nobody has to pay. Annoying, not expensive. |
+| **Disburse** | Move money out of your balance | **Somebody can spend your balance.** |
+| **Read only** | Read collections and disbursements. Creates and moves nothing. | Your data is readable. No money can move. |
 | **Read only** | Look at balances and history | Disclosure, but nothing moves. |
 
-They're independent, not a ladder. Taking payments never implies sending payouts.
+There is a third, **read only**, which reads collections and disbursements and creates
+nothing. Useful for a reporting job or a dashboard that should never be able to move
+money.
+
+They're independent, not a ladder. Collecting never implies disbursing, and *read only*
+grants no ability to create anything — it is an alternative on the read endpoints, not a
+level above them.
 
 <Callout type="warn">
-**Use two keys.** One with *take payments* for whatever creates charges — often something
-public-facing. One with *send payouts* on a locked-down server that nothing else touches.
+**Use two keys.** One with *collect* for whatever creates charges — often something
+public-facing. One with *disburse* on a locked-down server that nothing else touches.
 
 Then a leaked checkout key costs you nothing. One key holding both means the key in your
 storefront is also the key that can empty your balance.
@@ -53,7 +60,7 @@ revoke the old one.
 
 ### Getting the payout permission
 
-**Send payouts** can only be granted while payouts are enabled on your account. If the
+**Disburse** can only be granted while disbursement is enabled on your account. If the
 option is refused, contact support — a key whose stated power doesn't exist would be worse
 than being told no.
 
@@ -62,7 +69,7 @@ than being told no.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl https://connect.tchokopay.com/v1/channels \
+curl https://connect.tchokopay.com/v1/account/providers \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 </Tab>
@@ -72,7 +79,7 @@ const headers = {
   Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
 };
 
-const res = await fetch('https://connect.tchokopay.com/v1/channels', { headers });
+const res = await fetch('https://connect.tchokopay.com/v1/account/providers', { headers });
 ```
 </Tab>
 <Tab value="Python">
@@ -81,7 +88,7 @@ import os
 import requests
 
 headers = {"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"}
-response = requests.get("https://connect.tchokopay.com/v1/channels", headers=headers)
+response = requests.get("https://connect.tchokopay.com/v1/account/providers", headers=headers)
 ```
 </Tab>
 </Tabs>

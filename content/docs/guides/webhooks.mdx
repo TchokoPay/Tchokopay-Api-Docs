@@ -10,7 +10,7 @@ reaches a terminal state, signed so you can verify it actually came from TchokoP
 ## Registering an endpoint
 
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/webhooks \
+curl -X POST https://connect.tchokopay.com/v1/webhook \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "url": "https://mystore.example.com/webhooks/tchokopay" }'
@@ -29,7 +29,7 @@ The response includes your signing secret, shown **once** — save it:
 
 <Callout type="info">
   One endpoint per merchant account. Registering a new URL rotates the secret and clears
-  any auto-disable state (see below). `GET /v1/webhooks` returns your current endpoint's
+  any auto-disable state (see below). `GET /v1/webhook` returns your current endpoint's
   `url`, `isActive`, and disable status — never the secret again.
 </Callout>
 
@@ -60,7 +60,7 @@ A signed `POST` when a payment reaches `SUCCESS` or `FAILED`:
 <Callout type="warn" title="amount vs. settledAmount">
   `amount`/`currency` is what the **payer was actually charged** (fee-inclusive).
   `settledAmount`/`settledCurrency` is what **you** actually received (net) — the same
-  number `GET /v1/payments/:reference` returns as `amount`/`currency`. These are two
+  number `GET /v1/collect/:reference` returns as `amount`/`currency`. These are two
   different, both-correct numbers by design: the gap between them is the platform fee.
   Use whichever one answers the question you're actually asking.
 </Callout>
@@ -207,9 +207,9 @@ def tchokopay_webhook():
 A failed delivery (your endpoint down, timing out, or returning a non-2xx) is retried
 automatically with backoff. If your endpoint fails **10 consecutive events with zero
 successes**, it's automatically disabled so you stop losing retries into a dead URL —
-you'll see this on `GET /v1/webhooks` (`isActive: false`, `disabledReason` set) and in
+you'll see this on `GET /v1/webhook` (`isActive: false`, `disabledReason` set) and in
 your merchant dashboard, with a one-click reactivate that doesn't require rotating your
 secret.
 
 If you'd rather not rely on webhooks at all,
-[`GET /v1/payments/:reference`](/docs/api-reference/get-payment) always works — poll it.
+[`GET /v1/collect/:reference`](/docs/api-reference/get-collection) always works — poll it.

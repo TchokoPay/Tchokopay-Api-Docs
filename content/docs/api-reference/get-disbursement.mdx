@@ -1,12 +1,12 @@
 ---
-title: Payout status
-description: GET /v1/payouts/:reference — check whether a payout landed.
+title: Get a disbursement
+description: GET /v1/disburse/{reference} — check whether a disbursement landed.
 icon: Search
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono font-semibold">GET</span>
-  <code className="text-sm break-all">/v1/payouts/:reference</code>
+  <code className="text-sm break-all">/v1/disburse/:reference</code>
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
 </div>
 
@@ -19,14 +19,14 @@ reference exists.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl https://connect.tchokopay.com/v1/payouts/PO-1787962449863-7B361B \
+curl https://connect.tchokopay.com/v1/disburse/PO-1787962449863-7B361B \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
 const res = await fetch(
-  `https://connect.tchokopay.com/v1/payouts/${reference}`,
+  `https://connect.tchokopay.com/v1/disburse/${reference}`,
   { headers: { Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}` } },
 );
 
@@ -36,7 +36,7 @@ const payout = await res.json();
 <Tab value="Python">
 ```python
 response = requests.get(
-    f"https://connect.tchokopay.com/v1/payouts/{reference}",
+    f"https://connect.tchokopay.com/v1/disburse/{reference}",
     headers={"Authorization": f"Bearer {payout_key}"},
 )
 payout = response.json()

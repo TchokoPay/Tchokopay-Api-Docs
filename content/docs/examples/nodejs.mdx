@@ -16,7 +16,7 @@ const TCHOKO_KEY = process.env.TCHOKOPAY_API_KEY;
 const WEBHOOK_SECRET = process.env.TCHOKOPAY_WEBHOOK_SECRET;
 
 async function chargeCustomer(orderId, amountXaf) {
-  const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+  const res = await fetch('https://connect.tchokopay.com/v1/collect/checkout', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${TCHOKO_KEY}`,

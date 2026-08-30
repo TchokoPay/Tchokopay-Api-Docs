@@ -1,11 +1,12 @@
 {
   "title": "Guides",
   "pages": [
-    "multi-currency",
-    "payouts",
-    "idempotency",
-    "webhooks",
+    "whats-new",
     "status-lifecycle",
-    "errors-and-limits"
+    "webhooks",
+    "idempotency",
+    "errors-and-limits",
+    "multi-currency",
+    "payouts"
   ]
 }

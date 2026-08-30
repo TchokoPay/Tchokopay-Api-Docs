@@ -1,12 +1,12 @@
 ---
-title: Create a payment
-description: POST /v1/payments — create a hosted checkout payment.
+title: Create a checkout
+description: POST /v1/collect/checkout — create a hosted checkout page and get a link.
 icon: CreditCard
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
-  <code className="text-sm break-all">/v1/payments</code>
+  <code className="text-sm break-all">/v1/collect/checkout</code>
 </div>
 
 Creates a payment and returns a hosted checkout link. Redirect your customer there —
@@ -17,7 +17,7 @@ they pick their own payment method and complete the payment on TchokoPay's page.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: order-4821-attempt-1" \
@@ -32,7 +32,7 @@ curl -X POST https://connect.tchokopay.com/v1/payments \
 </Tab>
 <Tab value="Node.js">
 ```js
-const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+const res = await fetch('https://connect.tchokopay.com/v1/collect/checkout', {
   method: 'POST',
   headers: {
     Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
@@ -54,7 +54,7 @@ const payment = await res.json();
 <Tab value="Python">
 ```python
 response = requests.post(
-    "https://connect.tchokopay.com/v1/payments",
+    "https://connect.tchokopay.com/v1/collect/checkout",
     headers={
         "Authorization": f"Bearer {api_key}",
         "Idempotency-Key": "order-4821-attempt-1",

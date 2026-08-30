@@ -21,7 +21,7 @@ These get confused constantly, so we keep them strictly apart.
 | Money goes to | **Your own** account | **Somebody else's** number |
 | Started by | A person in the dashboard | Your backend, via the API |
 | Approved by | An admin, always | Nobody, unless it's large |
-| Lives at | Dashboard → Withdrawals | `POST /v1/payouts` |
+| Lives at | Dashboard → Withdrawals | `POST /v1/disburse` |
 
 They ride the same rails and share nothing else. If you're moving your own balance to your
 own MoMo number, that's a withdrawal and it isn't in the API.
@@ -54,7 +54,7 @@ and never widened afterwards. See [Scopes](/docs/authentication#scopes).
 
 A per-payout ceiling, a rolling daily ceiling, and a rolling weekly one, set on your
 account. Check what is left with
-[`GET /v1/payout-limits/:currency`](/docs/api-reference/payout-limits) — high-volume
+[`GET /v1/account/disburse-limits/:currency`](/docs/api-reference/disburse-limits) — high-volume
 accounts get ceilings to match their volume.
 </Step>
 <Step>
@@ -73,7 +73,7 @@ arrives with `awaitingReview: true` and stays `PENDING` until somebody releases 
 
 ## Idempotency is mandatory
 
-`Idempotency-Key` is **required** on `POST /v1/payouts`, unlike on payments.
+`Idempotency-Key` is **required** on `POST /v1/disburse`, unlike on payments.
 
 The asymmetry is deliberate. A duplicated charge creates an invoice nobody has to pay — a
 tidy-up. A duplicated payout sends real money twice and cannot be recalled.
@@ -105,13 +105,13 @@ You'll get a `payout.failed` webhook, and the payout will show why in `statusRea
 // a seller settlement, a user withdrawal, a loan disbursement, a refund.
 async function sendPayout(instruction) {
   // Fail early rather than half way through a batch.
-  const limits = await get('/v1/payout-limits/XAF');
+  const limits = await get('/v1/account/disburse-limits/XAF');
   if (!limits.configured) throw new Error('Payouts not enabled on this account');
   if (limits.remainingToday !== null && limits.remainingToday < instruction.amount) {
     throw new Error('Would exceed the daily payout limit');
   }
 
-  const payout = await post('/v1/payouts', {
+  const payout = await post('/v1/disburse', {
     amount: instruction.amount,
     currency: 'XAF',
     recipientPhone: instruction.recipientPhone,

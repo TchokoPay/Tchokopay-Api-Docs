@@ -23,7 +23,7 @@ WEBHOOK_SECRET = os.environ["TCHOKOPAY_WEBHOOK_SECRET"]
 
 def charge_customer(order_id: str, amount_xaf: int) -> str:
     response = requests.post(
-        "https://connect.tchokopay.com/v1/payments",
+        "https://connect.tchokopay.com/v1/collect/checkout",
         headers={
             "Authorization": f"Bearer {TCHOKO_KEY}",
             "Idempotency-Key": f"charge-{order_id}",

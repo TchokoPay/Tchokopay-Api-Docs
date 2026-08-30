@@ -6,18 +6,42 @@ icon: TriangleAlert
 
 ## Error format
 
-Every error response has the same shape:
+Every error has the same shape:
 
 ```json
 {
-  "message": "amount has more precision than XAF supports (0 decimal places)",
-  "error": "Bad Request",
-  "statusCode": 400
+  "code": "INVALID_REQUEST",
+  "message": "Amount is below the XAF minimum of 100.",
+  "param": "amount",
+  "requestId": "8e281c99-05b6-4fc3-ba79-58c55198b40b"
 }
 ```
 
-`message` is written to be actionable on its own — you shouldn't need to guess what to
-fix.
+| Field | Description |
+|---|---|
+| `code` | **Branch on this.** Stable, and it will not change when somebody rewords a sentence. |
+| `message` | Written to be shown to a person as-is. Never a contract — treat the wording as free to change. |
+| `param` | The field at fault, when the failure is about one. Absent otherwise. |
+| `requestId` | Also returned as the `X-Request-Id` header. Quote it to support and they can find the exact call. |
+
+<Callout type="warn">
+  Never branch on `message`. It is written for humans and gets improved. `code` is the
+  contract.
+</Callout>
+
+### Codes
+
+| `code` | Meaning |
+|---|---|
+| `INVALID_REQUEST` | Something in the request is wrong — bad amount, unknown currency, a number that doesn't match the provider, a field that shouldn't be there. `param` usually names it. |
+| `UNAUTHORIZED` | Key missing, invalid, or revoked. |
+| `FORBIDDEN` | Your key lacks the scope, your account isn't approved, or a provider isn't enabled for you. The message says which. |
+| `NOT_FOUND` | No such reference — or it belongs to another account. Identical either way, so you can't use it to probe. |
+| `RATE_LIMITED` | Too many requests. See below. |
+| `SERVER_ERROR` | Ours. Retry, and quote the `requestId` if it persists. |
+
+Only one error is reported per request — the first thing wrong, so you have one thing to
+fix rather than a list to work through.
 
 ## Status codes
 
@@ -31,25 +55,30 @@ fix.
 
 ## Rate limits
 
-Per API key:
+Every key starts with a default ceiling:
 
 <Cards>
   <Card title="30 requests / minute" description="Short burst window." />
   <Card title="600 requests / hour" description="Sustained volume window." />
 </Cards>
 
-Exceeding either returns `429` with a message telling you which window you hit:
+Exceeding either returns `429`, naming the window and the limit:
 
 ```json
 {
-  "message": "Rate limit exceeded: 30 requests per minute",
-  "error": "Too Many Requests",
-  "statusCode": 429
+  "code": "RATE_LIMITED",
+  "message": "Too many requests in 1 minute (limit 30) — please slow down.",
+  "requestId": "..."
 }
 ```
 
-<Callout type="info">
-  If you're hitting these limits during normal operation, generate a second API key for a
-  separate integration or environment rather than sharing one key across unrelated
-  traffic — limits are scoped per key, not per merchant account.
-</Callout>
+### If the default is too small
+
+It is sized for an ordinary integration — a checkout creating a payment and polling it.
+If you're driving real volume, **the ceiling is raised per key**: talk to us at
+[tech@tchokopay.com](mailto:tech@tchokopay.com) and tell us roughly what throughput you
+expect. A raised limit takes effect immediately, with no key rotation.
+
+Limits are per **key**, not per account, and that's deliberate — your server-side
+integration can be given headroom your public checkout key should never have. Two
+integrations sharing one key also share one ceiling, so give each its own.

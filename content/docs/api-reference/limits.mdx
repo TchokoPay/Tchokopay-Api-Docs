@@ -1,0 +1,44 @@
+---
+title: Amount limits
+description: GET /v1/limits — the smallest and largest amount per currency.
+icon: Scale
+---
+
+<div className="not-prose flex flex-wrap items-center gap-2">
+  <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">GET</span>
+  <code className="text-sm break-all">/v1/limits</code>
+</div>
+
+The bounds on a single movement of each currency. **The same bounds apply in both
+directions** — money doesn't change size because of which way it travels — so this one
+list covers collecting and disbursing alike.
+
+```bash
+curl https://connect.tchokopay.com/v1/limits \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+
+```json
+[
+  { "currency": "XAF", "min": 100, "max": 5000000, "decimals": 0 },
+  { "currency": "USD", "min": 1,   "max": 50000,   "decimals": 2 }
+]
+```
+
+| Field | Description |
+|---|---|
+| `min` / `max` | Smallest and largest single amount, in that currency. |
+| `decimals` | How many decimal places the currency actually has. Sending more is rejected, never silently rounded. |
+
+Validate against this before you call us and you'll turn a round trip into a form error
+your customer can fix immediately.
+
+<Callout type="info">
+  These are the **platform's** bounds. Disbursement may be narrower for your account if
+  an admin has set you a per-transaction ceiling — see
+  [your disburse limits](/docs/api-reference/disburse-limits).
+</Callout>
+
+## Caching this
+
+Safe to cache for an hour.

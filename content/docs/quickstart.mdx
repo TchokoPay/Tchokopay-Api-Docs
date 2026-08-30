@@ -26,7 +26,7 @@ password.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -39,7 +39,7 @@ curl -X POST https://connect.tchokopay.com/v1/payments \
 </Tab>
 <Tab value="Node.js">
 ```js
-const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+const res = await fetch('https://connect.tchokopay.com/v1/collect/checkout', {
   method: 'POST',
   headers: {
     Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
@@ -63,7 +63,7 @@ import os
 import requests
 
 response = requests.post(
-    "https://connect.tchokopay.com/v1/payments",
+    "https://connect.tchokopay.com/v1/collect/checkout",
     headers={"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"},
     json={
         "amount": 5000,
@@ -105,10 +105,10 @@ on TchokoPay's hosted page — no payment UI for you to build.
 
 ## 5. Find out what happened
 
-Either poll [`GET /v1/payments/:reference`](/docs/api-reference/get-payment), or set up a
+Either poll [`GET /v1/collect/:reference`](/docs/api-reference/get-collection), or set up a
 [webhook](/docs/guides/webhooks) once and get notified automatically.
 
 <Callout type="info">
   Every field in this response is documented in full on the
-  [`POST /v1/payments` reference page](/docs/api-reference/create-payment).
+  [`POST /v1/collect/checkout` reference page](/docs/api-reference/create-checkout).
 </Callout>

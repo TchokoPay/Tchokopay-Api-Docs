@@ -7,11 +7,11 @@ icon: House
 TchokoPay's Merchant API moves money in both directions from your own backend. You build
 the product; we are the rails underneath it.
 
-**Take payments** — create a charge, send your customer to a hosted checkout page carrying
+**Collect** — charge a number directly from your own checkout, or send your customer to a hosted page carrying
 your branding, and get notified the moment it resolves. No payment UI to build, no mobile
 money integration to maintain.
 
-**Send payouts** — move money out to any mobile money number, from your own systems.
+**Disburse** — move money out to any mobile money number, from your own systems.
 Whoever your business needs to pay, and however many of them.
 
 Both halves are built to be embedded in something else. An e-commerce platform settling
@@ -33,7 +33,7 @@ and imposes no shape on your product.
 <Step>
 ### Create a payment
 
-`POST /v1/payments` with an amount, a currency, and a description. You get back a
+`POST /v1/collect/checkout` with an amount, a currency, and a description. You get back a
 `checkoutUrl`.
 </Step>
 <Step>
@@ -46,7 +46,7 @@ touch payment details.
 <Step>
 ### Get notified
 
-Either poll `GET /v1/payments/:reference`, or register a webhook once and get a signed
+Either poll `GET /v1/collect/:reference`, or register a webhook once and get a signed
 `POST` the moment the payment succeeds or fails.
 </Step>
 </Steps>
@@ -57,7 +57,7 @@ Either poll `GET /v1/payments/:reference`, or register a webhook once and get a 
   customer actually paid with. See [Multi-currency](/docs/guides/multi-currency).
 - **Signed, replay-protected webhooks** — HMAC-signed, timestamp-bound, automatically
   retried with backoff. See [Webhooks](/docs/guides/webhooks).
-- **Idempotent requests** — retry any `POST /v1/payments` call safely with an
+- **Idempotent requests** — retry any `POST /v1/collect/checkout` call safely with an
   `Idempotency-Key`. See [Idempotency & retries](/docs/guides/idempotency).
 - **Key-scoped access** — generate, rotate, and revoke API keys yourself from your
   merchant dashboard. Revocation is immediate.
@@ -74,5 +74,5 @@ the routes documented here.
 ## Rollout
 
 Cameroon (MTN MoMo, Orange Money) at launch, with more countries opening over time. Check
-[`GET /v1/channels`](/docs/api-reference/list-channels) to see what's live for your
+[`GET /v1/account/providers`](/docs/api-reference/account-providers) to see what's live for your
 account right now.
