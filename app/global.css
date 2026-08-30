@@ -124,17 +124,6 @@ body {
   background-color: rgb(8 11 20 / 0.66);
 }
 
-/* Subtle dot-grid used behind the landing hero — CSS only, no image asset,
-   themed for both light/dark via currentColor + low opacity. */
-.bg-grid-pattern {
-  background-image: radial-gradient(circle, var(--color-fd-foreground) 1px, transparent 1px);
-  background-size: 26px 26px;
-  opacity: 0.05;
-  /* Fades out before the section edge so the hero sits on the page rather than
-     inside a visible rectangle of dots. */
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 100%);
-}
-
 /* ── Nav labels that roll over ─────────────────────────────────────────
    Two stacked copies of the word inside a one-line window; hovering the link
    slides both up by exactly that line, so one leaves as the other arrives.

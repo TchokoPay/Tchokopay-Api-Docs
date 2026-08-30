@@ -72,7 +72,6 @@ export default function HomePage() {
           on the site — see `.hero-dark` in global.css, which redefines the
           theme tokens rather than restyling what sits inside it. */}
       <section className="hero-dark relative overflow-hidden">
-        <div aria-hidden className="bg-grid-pattern pointer-events-none absolute inset-0" />
         {/* The nav floats inside the band, so the band has to start behind it:
             the section is pulled up by the nav’s height and the top padding
             gives it back, which keeps the pill sitting on the hero rather than
