@@ -48,7 +48,7 @@ curl -X POST https://connect.tchokopay.com/v1/collect/charge \
     "country": "CM",
     "provider": "mtn_cm",
     "phone": "670000000",
-    "reference": "order_4821"
+    "merchantReference": "order_4821"
   }'
 ```
 
@@ -82,7 +82,7 @@ curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
     "amount": 5000,
     "currency": "XAF",
     "description": "Order #4821",
-    "reference": "order_4821"
+    "merchantReference": "order_4821"
   }'
 ```
 
@@ -164,9 +164,9 @@ curl -X POST https://connect.tchokopay.com/v1/disburse \
     "currency": "XAF",
     "country": "CM",
     "provider": "mtn_cm",
-    "recipientPhone": "670000000",
+    "phone": "670000000",
     "recipientName": "Amina Njoya",
-    "reference": "supplier-invoice-8821"
+    "merchantReference": "supplier-invoice-8821"
   }'
 ```
 

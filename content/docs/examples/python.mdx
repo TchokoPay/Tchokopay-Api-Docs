@@ -67,7 +67,7 @@ def charge_phone(order_id, amount, *, phone, provider, country):
             "country": country,
             "provider": provider,
             "phone": phone,
-            "reference": order_id,
+            "merchantReference": order_id,
             "description": f"Order {order_id}",
         },
     )
@@ -109,7 +109,7 @@ def checkout(order_id):
             "amount": 5000,
             "currency": "XAF",
             "description": f"Order {order_id}",
-            "reference": order_id,
+            "merchantReference": order_id,
         },
     )
     return redirect(payment["checkoutUrl"])
@@ -142,9 +142,9 @@ def disburse(instruction_id, amount, *, phone, provider, country, name):
             "currency": "XAF",
             "country": country,
             "provider": provider,
-            "recipientPhone": phone,
+            "phone": phone,
             "recipientName": name,
-            "reference": instruction_id,
+            "merchantReference": instruction_id,
         },
     )
 ```

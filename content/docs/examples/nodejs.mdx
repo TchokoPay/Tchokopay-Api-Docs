@@ -63,7 +63,7 @@ async function chargePhone(orderId, amount, { phone, provider, country }) {
       country,
       provider,
       phone,
-      reference: orderId,
+      merchantReference: orderId,
       description: `Order ${orderId}`,
     },
   });
@@ -136,9 +136,9 @@ async function disburse(instructionId, amount, { phone, provider, country, name 
       currency: 'XAF',
       country,
       provider: provider,
-      recipientPhone: phone,
+      phone: phone,
       recipientName: name,
-      reference: instructionId,
+      merchantReference: instructionId,
     },
   });
 }

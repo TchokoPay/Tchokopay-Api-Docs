@@ -34,7 +34,7 @@ curl -X POST https://connect.tchokopay.com/v1/collect/charge \
     "country": "CM",
     "provider": "mtn_cm",
     "phone": "670000000",
-    "reference": "order_4821",
+    "merchantReference": "order_4821",
     "description": "Order #4821"
   }'
 ```
@@ -54,7 +54,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/collect/charge', {
     country: 'CM',
     provider: 'mtn_cm',
     phone: '670000000',
-    reference: 'order_4821',
+    merchantReference: 'order_4821',
     description: 'Order #4821',
   }),
 });
@@ -78,7 +78,7 @@ res = requests.post(
         "country": "CM",
         "provider": "mtn_cm",
         "phone": "670000000",
-        "reference": "order_4821",
+        "merchantReference": "order_4821",
         "description": "Order #4821",
     },
 )

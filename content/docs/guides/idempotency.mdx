@@ -16,7 +16,7 @@ curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Idempotency-Key: order-4821-attempt-1" \
   -H "Content-Type: application/json" \
-  -d '{ "amount": 5000, "currency": "XAF", "reference": "order_4821" }'
+  -d '{ "amount": 5000, "currency": "XAF", "merchantReference": "order_4821" }'
 ```
 </Tab>
 <Tab value="Node.js">
@@ -40,7 +40,7 @@ response = requests.post(
         "Authorization": f"Bearer {api_key}",
         "Idempotency-Key": f"order-{order_id}-attempt-1",
     },
-    json={"amount": 5000, "currency": "XAF", "reference": order_id},
+    json={"amount": 5000, "currency": "XAF", "merchantReference": order_id},
 )
 ```
 </Tab>

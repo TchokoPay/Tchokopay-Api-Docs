@@ -106,7 +106,7 @@ async function sendPayout(instruction) {
   const payout = await post('/v1/disburse', {
     amount: instruction.amount,
     currency: 'XAF',
-    recipientPhone: instruction.recipientPhone,
+    phone: instruction.phone,
     recipientName: instruction.recipientName,
     // Your own id, so you can reconcile without storing ours.
     reference: instruction.id,

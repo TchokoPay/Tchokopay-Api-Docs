@@ -1,8 +1,26 @@
 ---
 title: Errors & rate limits
-description: Every error status you'll see, and how fast you can call the API.
+description: Every error you'll see, how fast you can call, and the field naming rules.
 icon: TriangleAlert
 ---
+
+## Field naming
+
+Three rules the whole API follows, so you never have to check which endpoint
+you're on:
+
+| | |
+|---|---|
+| `reference` | **Always ours.** The identifier we generate — `REQ-…` for a collection, `PO-…` for a disbursement. |
+| `merchantReference` | **Always yours.** Send it under this name, read it back under this name. |
+| `phone` | The mobile money number, whether you're collecting from it or paying it. |
+| `provider` | Which network — `mtn_cm`, `orange_cm`. Same name on every request and response. |
+
+<Callout type="info">
+  `reference` used to be accepted as the name for *your* identifier on requests, and
+  still is. But it meant one thing going out and another coming back, so
+  `merchantReference` is the name to use.
+</Callout>
 
 ## Error format
 
