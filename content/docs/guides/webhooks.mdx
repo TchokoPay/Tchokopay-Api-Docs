@@ -52,10 +52,17 @@ A signed `POST` when a payment reaches `SUCCESS` or `FAILED`:
   "requestedAmount": 50,
   "requestedCurrency": "USD",
   "paymentMethod": "LIGHTNING",
+  "providerCode": "lightning",
   "failureReason": null,
   "timestamp": "2026-07-30T09:04:12.000Z"
 }
 ```
+
+<Callout type="info" title="paymentMethod vs. providerCode">
+  `paymentMethod` is the class — `MOBILE_MONEY` for MTN, Orange and every other
+  network alike — so it cannot tell you which one paid. `providerCode` can, and is the
+  field to branch on. It is `null` until a payer has chosen.
+</Callout>
 
 <Callout type="warn" title="amount vs. settledAmount">
   `amount`/`currency` is what the **payer was actually charged** (fee-inclusive).

@@ -135,7 +135,7 @@ async function disburse(instructionId, amount, { phone, provider, country, name 
       amount,
       currency: 'XAF',
       country,
-      payoutProviderCode: provider,
+      provider: provider,
       recipientPhone: phone,
       recipientName: name,
       reference: instructionId,

@@ -37,7 +37,7 @@ curl -X POST https://connect.tchokopay.com/v1/disburse \
     "currency": "XAF",
     "recipientPhone": "670000000",
     "recipientName": "Amina Njoya",
-    "payoutProviderCode": "mtn_cm",
+    "provider": "mtn_cm",
     "reference": "supplier-invoice-4417"
   }'
 ```
@@ -57,7 +57,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/disburse', {
     currency: 'XAF',
     recipientPhone: '670000000',
     recipientName: 'Amina Njoya',
-    payoutProviderCode: 'mtn_cm',
+    provider: 'mtn_cm',
     reference: 'supplier-invoice-4417',
   }),
 });
@@ -78,7 +78,7 @@ response = requests.post(
         "currency": "XAF",
         "recipientPhone": "670000000",
         "recipientName": "Amina Njoya",
-        "payoutProviderCode": "mtn_cm",
+        "provider": "mtn_cm",
         "reference": "supplier-invoice-4417",
     },
 )
@@ -95,7 +95,7 @@ payout = response.json()
 | `currency` | string | **required** | A currency you hold a balance in. No conversion happens — you pay out what you hold. |
 | `recipientPhone` | string | **required** | The mobile money number to pay, in local format. Max 32 characters. |
 | `recipientName` | string | optional | Who is being paid. Shown on your dashboard and to our reviewers. Max 120 characters. |
-| `payoutProviderCode` | string | optional | Which network — `mtn_cm`, `orange_cm`. Omit and we detect it from the number. Supply it when you already know, so a mis-detected network can't send money to the wrong operator. |
+| `provider` | string | optional | Which network — `mtn_cm`, `orange_cm`. Omit and we detect it from the number. Supply it when you already know, so a mis-detected network can't send money to the wrong operator. |
 | `country` | string | optional | ISO country of the recipient number. Defaults to `CM`. |
 | `reference` | string | optional | Your own identifier. Echoed back as `merchantReference` on every response and webhook. Max 120 characters. |
 

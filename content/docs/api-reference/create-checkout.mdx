@@ -105,6 +105,8 @@ payment = response.json()
   "description": "Order #4821",
   "merchantReference": "order_4821",
   "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B",
+  "method": null,
+  "providerCode": null,
   "expiresAt": "2026-07-30T10:00:00.000Z",
   "createdAt": "2026-07-30T09:00:00.000Z",
   "failureCategory": null
@@ -119,6 +121,8 @@ payment = response.json()
 | `requestedAmount` / `requestedCurrency` | The price **you asked for**, fixed for the life of the payment. |
 | `merchantReference` | Echoes back the `reference` you sent, or `null` if you didn't send one. |
 | `checkoutUrl` | Send your customer here. `null` once the payment is no longer payable. |
+| `method` | The payment class — `MOBILE_MONEY`, `CARD`, `CRYPTO`. `null` until your customer has chosen. It is the same value for every mobile money network, so it cannot tell you which one paid. |
+| `providerCode` | Which network actually paid — `mtn_cm`, `orange_cm`, `lightning`. `null` until your customer has chosen. **This is the field to branch on**, not `method`. |
 | `expiresAt` | When the checkout link stops accepting payment. |
 | `failureCategory` | `null` unless `status` is `FAILED` — see [Failure categories](/docs/guides/status-lifecycle#failure-categories). |
 
