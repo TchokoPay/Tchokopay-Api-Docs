@@ -1,6 +1,6 @@
 import './global.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Sora } from 'next/font/google';
+import { JetBrains_Mono, Sora } from 'next/font/google';
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 
@@ -14,13 +14,23 @@ const sora = Sora({
   display: 'swap',
 });
 
+// Monospace is not decoration here: the page uses it to mark machine
+// vocabulary — endpoints, statuses, references, and the two verbs the API is
+// named around — so it needs a real face, not whatever the OS supplies.
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono-brand',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: {
     default: 'TchokoPay Merchant API',
     template: '%s | TchokoPay Merchant API',
   },
   description:
-    'Accept payments from your own backend with the TchokoPay Merchant API — hosted checkout, multi-currency pricing, and signed webhooks.',
+    'Take mobile money payments and send them back out, from your own backend. Two verbs — collect and disburse — with signed webhooks and idempotent requests.',
   metadataBase: new URL('https://docs.tchokopay.com'),
   icons: {
     icon: '/favicon.png',
@@ -29,7 +39,20 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={sora.variable} suppressHydrationWarning>
+    <html lang="en" className={`${sora.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        {/*
+          Marks the document as scripted, before first paint, so CSS can hide
+          scroll-revealed content only where something exists to reveal it.
+          Without this the page would serve invisible sections to anything that
+          does not run scripts — crawlers included.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <body className="flex min-h-screen flex-col">
         <RootProvider>{children}</RootProvider>
       </body>

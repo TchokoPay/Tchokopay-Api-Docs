@@ -58,7 +58,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/disburse', {
     phone: '670000000',
     recipientName: 'Amina Njoya',
     provider: 'mtn_cm',
-    reference: 'supplier-invoice-4417',
+    merchantReference: 'supplier-invoice-4417',
   }),
 });
 
@@ -97,7 +97,7 @@ payout = response.json()
 | `recipientName` | string | optional | Who is being paid. Shown on your dashboard and to our reviewers. Max 120 characters. |
 | `provider` | string | optional | Which network — `mtn_cm`, `orange_cm`. Omit and we detect it from the number. Supply it when you already know, so a mis-detected network can't send money to the wrong operator. |
 | `country` | string | optional | ISO country of the recipient number. Defaults to `CM`. |
-| `reference` | string | optional | Your own identifier. Echoed back as `merchantReference` on every response and webhook. Max 120 characters. |
+| `merchantReference` | string | optional | Your own identifier. Echoed back as `merchantReference` on every response and webhook. Max 120 characters. |
 
 ### Headers
 

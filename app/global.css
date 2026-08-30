@@ -9,6 +9,10 @@
      Tailwind's default system-ui stack everywhere font-sans is used. */
   --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
 
+  /* The page reads mono as "this is a machine's word" — an endpoint, a status,
+     a reference, a scope. Given that job it is a chosen face, not a fallback. */
+  --font-mono: var(--font-mono-brand), ui-monospace, 'SFMono-Regular', monospace;
+
   /* Tailwind's default jump from no-breakpoint to `sm` (640px) is too big
      for "stack two buttons until there's room to sit side by side" — most
      phones (375-428px wide) have room for two short buttons in a row well
@@ -61,6 +65,56 @@ body {
    themed for both light/dark via currentColor + low opacity. */
 .bg-grid-pattern {
   background-image: radial-gradient(circle, var(--color-fd-foreground) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.06;
+  background-size: 26px 26px;
+  opacity: 0.05;
+  /* Fades out before the section edge so the hero sits on the page rather than
+     inside a visible rectangle of dots. */
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 100%);
+}
+
+/* ── Entrance motion ───────────────────────────────────────────────────
+   The resting state of everything here is VISIBLE. Motion runs from a
+   hidden state to the natural one, so markup served without scripting —
+   or with it still loading — reads as a finished page rather than a blank
+   one. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.rise {
+  /* `backwards` holds the from-state through the delay, so a staggered group
+     does not flash into place before its turn. */
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Scroll reveals hide only where an observer exists to bring them back. The
+   `js` class is set by an inline script; without it these are plain content. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.js .reveal[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+
+  .js .reveal,
+  .js .reveal[data-shown] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

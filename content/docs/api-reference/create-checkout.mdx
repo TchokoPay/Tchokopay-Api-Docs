@@ -79,7 +79,7 @@ payment = response.json()
 | `amount` | number | **required** | The amount, in `currency`. Decimals are allowed where the currency supports them (e.g. `49.99` for USD) — more precision than the currency actually has is rejected, not silently rounded. |
 | `currency` | string | **required** | Any active currency code — `XAF`, `USD`, `NGN`, `BTC`, etc. There's no fixed settlement currency to match — see [Multi-currency](/docs/guides/multi-currency). |
 | `description` | string | optional | Shown to the payer on the checkout page. Defaults to `"Payment to {your business name}"`. Max 200 characters. |
-| `reference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
+| `merchantReference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
 | `expiresInMinutes` | integer | optional | How long the checkout link stays payable. Default `60`, max `10080` (7 days). |
 
 ### Headers

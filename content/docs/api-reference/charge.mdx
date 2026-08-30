@@ -96,7 +96,7 @@ charge = res.json()
 | `country` | string | required | ISO country of the number. See [`GET /v1/countries`](/docs/api-reference/countries). |
 | `provider` | string | required | Which network to charge. A code from [`GET /v1/account/providers`](/docs/api-reference/account-providers). |
 | `phone` | string | required | The number to charge, in local format. |
-| `reference` | string | optional | Your own identifier, echoed back everywhere. |
+| `merchantReference` | string | optional | Your own identifier, echoed back everywhere. |
 | `description` | string | optional | Shown to the payer where the network supports it. |
 
 <Callout type="warn">
