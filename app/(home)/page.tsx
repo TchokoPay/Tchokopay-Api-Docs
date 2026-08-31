@@ -104,9 +104,8 @@ export default function HomePage() {
 
           <FadeUp delay={0.1}>
             <p className="text-fd-muted-foreground mx-auto mt-5 max-w-3xl text-base leading-relaxed text-balance sm:text-lg">
-              One API for mobile money across Africa. Collect from any supported
-              network, pay anyone out to any number, and never build an operator
-              integration yourself.
+              One API for mobile money across Africa. Collect from any network
+              and pay anyone out — no operator integrations to build.
             </p>
           </FadeUp>
 
