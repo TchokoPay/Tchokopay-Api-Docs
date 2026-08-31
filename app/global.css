@@ -130,13 +130,18 @@ body {
 
    It breathes too — slowly enough to read as depth rather than a blink.
 
+   The centre is the glow's own bright core — 50% 34%, and 50% 28% on a phone —
+   not the middle of the section. Sharing a centre is what makes the glow sit
+   down inside the hollow rather than merely near it; if the glow moves, this
+   moves with it.
+
    The radius is in rem, not a percentage: a percentage stop resolves against
    the gradient's own farthest-corner radius, which on a band this wide would
    push the ring off the bottom of the section entirely. */
 .hero-dots {
   fill: rgb(255 255 255 / 0.55);
   --hero-dots-mask: radial-gradient(
-    circle 44rem at 50% 44%,
+    circle 44rem at 50% 34%,
     transparent 0%,
     transparent 24%,
     rgb(0 0 0 / 0.5) 38%,
@@ -162,7 +167,7 @@ body {
 @media (max-width: 40rem) {
   .hero-dots {
     --hero-dots-mask: radial-gradient(
-      circle 17rem at 50% 33%,
+      circle 17rem at 50% 28%,
       transparent 0%,
       transparent 24%,
       rgb(0 0 0 / 0.5) 38%,
