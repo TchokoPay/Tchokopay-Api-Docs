@@ -122,6 +122,64 @@ body {
   background-color: transparent;
 }
 
+/* ── The hero's dot field ──────────────────────────────────────────────
+   Masked into a ring rather than laid flat: the middle is empty, so the dots
+   open away from the centre like the mouth of a cylinder with the glow sitting
+   down in the hollow. The mask fades in from the hole and out again at the rim,
+   so the field has no edge anywhere for the eye to catch.
+
+   It breathes too — slowly enough to read as depth rather than a blink.
+
+   The radius is in rem, not a percentage: a percentage stop resolves against
+   the gradient's own farthest-corner radius, which on a band this wide would
+   push the ring off the bottom of the section entirely. */
+.hero-dots {
+  fill: rgb(255 255 255 / 0.55);
+  --hero-dots-mask: radial-gradient(
+    circle 44rem at 50% 44%,
+    transparent 0%,
+    transparent 24%,
+    rgb(0 0 0 / 0.5) 38%,
+    black 52%,
+    black 62%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--hero-dots-mask);
+  mask-image: var(--hero-dots-mask);
+  animation: hero-dots-breathe 9s ease-in-out infinite;
+}
+
+@keyframes hero-dots-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 40rem) {
+  .hero-dots {
+    --hero-dots-mask: radial-gradient(
+      circle 17rem at 50% 33%,
+      transparent 0%,
+      transparent 24%,
+      rgb(0 0 0 / 0.5) 38%,
+      black 52%,
+      black 62%,
+      transparent 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-dots {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
 /* The glow behind the hero.
    Three passes, and the trick to their reading as one cloud rather than three
    discs is that they share a single colour and differ only in alpha. Layers in
