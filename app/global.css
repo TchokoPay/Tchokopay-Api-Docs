@@ -122,51 +122,66 @@ body {
   background-color: transparent;
 }
 
-/* ── The hero's dot cylinder ───────────────────────────────────────────
-   Positioned from its own centre onto the glow's bright core — 50% 34%, and
-   50% 28% on a phone — rather than stretched across the section. Sharing a
-   centre is what makes the glow sit down inside the hollow rather than merely
-   near it; if the glow moves, this moves with it.
+/* ── The hero's dot field ──────────────────────────────────────────────
+   Masked into a ring rather than laid flat: the middle is empty, so the dots
+   open away from the centre like the mouth of a cylinder with the glow sitting
+   down in the hollow. The mask fades in from the hole and out again at the rim,
+   so the field has no edge anywhere for the eye to catch.
 
-   Square, so the rings stay circular whatever shape the band is. The section
-   clips whatever runs past its edges.
+   It breathes too — slowly enough to read as depth rather than a blink.
 
-   The field breathes slowly — enough to read as depth, not as a blink. The
-   shape itself is drawn in dot-cylinder.tsx; only placement and movement are
-   here. */
+   The centre is the glow's own bright core — 50% 34%, and 50% 28% on a phone —
+   not the middle of the section. Sharing a centre is what makes the glow sit
+   down inside the hollow rather than merely near it; if the glow moves, this
+   moves with it.
+
+   The radius is in rem, not a percentage: a percentage stop resolves against
+   the gradient's own farthest-corner radius, which on a band this wide would
+   push the ring off the bottom of the section entirely. */
 .hero-dots {
-  position: absolute;
-  left: 50%;
-  top: var(--cylinder-y, 34%);
-  width: var(--cylinder-size, 62rem);
-  height: var(--cylinder-size, 62rem);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  fill: rgb(255 255 255 / 0.36);
+  fill: rgb(255 255 255 / 0.55);
+  --hero-dots-mask: radial-gradient(
+    circle 44rem at 50% 34%,
+    transparent 0%,
+    transparent 24%,
+    rgb(0 0 0 / 0.5) 38%,
+    black 52%,
+    black 62%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--hero-dots-mask);
+  mask-image: var(--hero-dots-mask);
   animation: hero-dots-breathe 9s ease-in-out infinite;
 }
 
 @keyframes hero-dots-breathe {
   0%,
   100% {
-    opacity: 0.2;
+    opacity: 0.3;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.8;
   }
 }
 
 @media (max-width: 40rem) {
   .hero-dots {
-    --cylinder-y: 28%;
-    --cylinder-size: 29rem;
+    --hero-dots-mask: radial-gradient(
+      circle 17rem at 50% 28%,
+      transparent 0%,
+      transparent 24%,
+      rgb(0 0 0 / 0.5) 38%,
+      black 52%,
+      black 62%,
+      transparent 100%
+    );
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-dots {
     animation: none;
-    opacity: 0.34;
+    opacity: 0.5;
   }
 }
 
