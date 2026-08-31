@@ -96,16 +96,17 @@ export default function HomePage() {
                 break is held only where there is room for it; on a phone the
                 sentence wraps on its own rather than breaking in a fixed
                 place that no longer suits the measure. */}
-            <h1 className="mt-7 max-w-4xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-[2rem] leading-[1.1] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-[3.4rem]">
+            <h1 className="mt-7 max-w-5xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-[2rem] leading-[1.08] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-[3.75rem]">
               Start collecting and disbursing
               <br className="hidden sm:inline" /> payments in five minutes.
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.1}>
-            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed text-balance sm:text-lg">
-              One API for mobile money across Africa. Money in, money out,
-              no operator integrations to build.
+            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-3xl text-base leading-relaxed text-balance sm:text-lg">
+              One API for mobile money across Africa. Collect from any supported
+              network, pay anyone out to any number, and never build an operator
+              integration yourself.
             </p>
           </FadeUp>
 

@@ -123,25 +123,42 @@ body {
 }
 
 /* The glow behind the hero.
-   Round, but not a compass circle. The core is a near-circular ellipse — a
-   touch wider than tall — with one small lobe pushed off-centre to break the
-   arc, and a soft halo settling the whole thing a shade off-axis. Enough
-   asymmetry that the eye reads weather rather than a CSS disc, not so much
-   that it stops being round.
+   Big and saturated enough to light the whole top of the page — it reaches up
+   past the nav, which is part of why the nav can carry no fill of its own.
 
-   Sized in rem rather than percentages: percentage radii are measured against
-   the element, so they stretch with the band and turn a round glow into a
-   smear on a wide viewport.
+   Round overall, but not a compass circle: three near-concentric passes build
+   the mass and hold the silhouette, and one lobe pushed off-centre breaks the
+   arc so the edge reads as weather rather than geometry.
+
+   Sized in rem rather than percentages, because percentage radii are measured
+   against the element — on a wide band they stretch, and a round glow becomes
+   a smear.
 
    Every stop ends on the same blue at zero alpha rather than on `transparent`.
    `transparent` is transparent BLACK, so interpolating toward it drags a grey
-   cast through the fade, and across overlapping layers that reads as dirty
-   seams where they cross. */
+   cast through the fade, and across four layers that reads as dirty seams
+   where they cross. */
 .hero-glow {
   background-image:
-    radial-gradient(14rem 13rem at 57% 31%, rgb(78 128 255 / 0.16) 0%, rgb(78 128 255 / 0) 72%),
-    radial-gradient(20rem 18rem at 48% 39%, rgb(59 109 255 / 0.3) 0%, rgb(59 109 255 / 0.12) 46%, rgb(59 109 255 / 0) 76%),
-    radial-gradient(29rem 26rem at 51% 41%, rgb(47 106 255 / 0.1) 0%, rgb(47 106 255 / 0) 80%);
+    radial-gradient(21rem 19rem at 59% 24%, rgb(110 152 255 / 0.34) 0%, rgb(110 152 255 / 0) 72%),
+    radial-gradient(31rem 27rem at 49% 34%, rgb(66 112 255 / 0.58) 0%, rgb(66 112 255 / 0.28) 45%, rgb(66 112 255 / 0) 76%),
+    radial-gradient(45rem 38rem at 51% 37%, rgb(52 92 235 / 0.28) 0%, rgb(52 92 235 / 0) 78%),
+    radial-gradient(63rem 52rem at 50% 39%, rgb(45 84 214 / 0.12) 0%, rgb(45 84 214 / 0) 82%);
+}
+
+/* The same cloud, sized for a phone. Absolute radii keep the glow round, but
+   they do not know how much room they are in: at full size the core is wider
+   than the viewport, so the whole screen sits inside the bright part and the
+   charcoal disappears. Scaled to roughly a third here, the hero is lit and the
+   ground still reads. */
+@media (max-width: 40rem) {
+  .hero-glow {
+    background-image:
+      radial-gradient(8rem 7rem at 60% 20%, rgb(110 152 255 / 0.34) 0%, rgb(110 152 255 / 0) 72%),
+      radial-gradient(12rem 10.5rem at 48% 28%, rgb(66 112 255 / 0.58) 0%, rgb(66 112 255 / 0.28) 45%, rgb(66 112 255 / 0) 76%),
+      radial-gradient(17rem 14.5rem at 51% 31%, rgb(52 92 235 / 0.28) 0%, rgb(52 92 235 / 0) 78%),
+      radial-gradient(24rem 20rem at 50% 33%, rgb(45 84 214 / 0.12) 0%, rgb(45 84 214 / 0) 82%);
+  }
 }
 
 /* ── Nav labels that roll over ─────────────────────────────────────────
