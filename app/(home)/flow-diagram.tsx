@@ -1,6 +1,6 @@
 "use client";
 
-import { Terminal } from "lucide-react";
+import { User } from "lucide-react";
 import { useRef } from "react";
 import { AnimatedBeam } from "./animated-beam";
 
@@ -106,7 +106,7 @@ export function FlowDiagram({
         innerRef={merchant}
         className={`shrink-0 ${compact ? "size-10" : "size-12"}`}
       >
-        <Terminal
+        <User
           className={`text-fd-muted-foreground ${compact ? "h-4 w-4" : "h-5 w-5"}`}
         />
       </Node>
@@ -119,8 +119,8 @@ export function FlowDiagram({
       role="img"
       aria-label={
         collecting
-          ? "Payments from MTN, Orange, Wave, Moov and Free arriving through TchokoPay into your application."
-          : "Payments leaving your application through TchokoPay out to MTN, Orange, Wave, Moov and Free."
+          ? "Payments from MTN, Orange, Wave, Moov and Free arriving through TchokoPay to you."
+          : "Payments leaving you through TchokoPay out to MTN, Orange, Wave, Moov and Free."
       }
       className={`relative mx-auto flex w-full max-w-lg items-center justify-center ${compact ? "h-[264px]" : "h-[340px]"}`}
     >
