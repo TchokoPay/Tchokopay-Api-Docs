@@ -15,20 +15,21 @@ import { AnimatedBeam } from "./animated-beam";
  * columns is the whole flip. That the two figures are mirror images is the
  * point: it is the same rail either way.
  *
- * The networks named here are real ones we hold integrations to in live
- * countries. MTN and Orange carry their own colours because those are the two
- * open to the API today; the rest are drawn neutral, which is the same
- * distinction the providers tile makes with its unfilled row.
+ * The networks are real ones we hold integrations to in live countries, and
+ * they carry their own marks, copied from the main app's public directory so
+ * the two sites cannot drift apart on what an operator looks like. Each sits
+ * on a white disc: the artwork is a full-bleed square tile, and a white ground
+ * means the one logo drawn with transparency still reads on a dark page.
  */
 
-type Network = { label: string; bg?: string; fg?: string };
+type Network = { label: string; src: string };
 
 const NETWORKS: Network[] = [
-  { label: "MTN", bg: "#FFCC00", fg: "#141414" },
-  { label: "Orange", bg: "#FF7900", fg: "#ffffff" },
-  { label: "Wave" },
-  { label: "Moov" },
-  { label: "Free" },
+  { label: "MTN", src: "/networks/mtn.png" },
+  { label: "Orange", src: "/networks/orange.svg" },
+  { label: "Wave", src: "/networks/wave.jpg" },
+  { label: "Moov", src: "/networks/moov.jpg" },
+  { label: "Free", src: "/networks/free.png" },
 ];
 
 function Node({
@@ -82,19 +83,16 @@ export function FlowDiagram({
         <Node
           key={net.label}
           innerRef={networks[i]}
-          className={`shrink-0 ${compact ? "size-10" : "size-12"}`}
-          style={
-            net.bg
-              ? { backgroundColor: net.bg, borderColor: "transparent" }
-              : undefined
-          }
+          className={`shrink-0 overflow-hidden bg-white ${compact ? "size-10" : "size-12"}`}
         >
-          <span
-            className={`font-mono tracking-tight ${compact ? "text-[0.45rem]" : "text-[0.5rem]"}`}
-            style={{ color: net.fg ?? "var(--color-fd-muted-foreground)" }}
-          >
-            {net.label}
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={net.src}
+            alt={net.label}
+            className="size-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         </Node>
       ))}
     </div>
