@@ -80,7 +80,7 @@ export default function HomePage() {
         <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pt-[8.5rem] pb-20 text-center sm:px-6 sm:pt-[10.5rem] sm:pb-28 lg:pt-[11.5rem] lg:pb-32">
           <FadeUp>
             <div className="border-fd-border flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border bg-white/5 px-4 py-2 text-sm">
-              <span className="text-fd-muted-foreground">Live on MTN and Orange</span>
+              <span className="text-fd-muted-foreground">Live in 6+ countries across Africa</span>
               <Link
                 href="/docs/api-reference/providers"
                 className="focus-visible:ring-fd-primary inline-flex items-center gap-1 font-medium transition-opacity hover:opacity-75 focus-visible:rounded-full focus-visible:ring-2 focus-visible:outline-none"
