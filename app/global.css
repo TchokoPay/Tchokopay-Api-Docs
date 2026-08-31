@@ -141,7 +141,7 @@ body {
 .hero-dots {
   fill: rgb(255 255 255 / 0.55);
   --hero-dots-mask: radial-gradient(
-    circle 44rem at 50% 34%,
+    circle 36rem at 50% 34%,
     transparent 0%,
     transparent 24%,
     rgb(0 0 0 / 0.5) 38%,
@@ -167,7 +167,7 @@ body {
 @media (max-width: 40rem) {
   .hero-dots {
     --hero-dots-mask: radial-gradient(
-      circle 17rem at 50% 28%,
+      circle 14rem at 50% 28%,
       transparent 0%,
       transparent 24%,
       rgb(0 0 0 / 0.5) 38%,

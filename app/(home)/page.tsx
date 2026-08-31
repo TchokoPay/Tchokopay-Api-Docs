@@ -78,7 +78,7 @@ export default function HomePage() {
             hollow, then the content. The glow moves off the section and onto
             its own element so the dots can get behind it — a background-image
             on the section would paint under every child, dots included. */}
-        <DotPattern className="hero-dots" />
+        <DotPattern className="hero-dots" width={16} height={16} cr={0.75} />
         <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
         {/* The nav floats inside the band, so the band has to start behind it:
             the section is pulled up by the nav’s height and the top padding
