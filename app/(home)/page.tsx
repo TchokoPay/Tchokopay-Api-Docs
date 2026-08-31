@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HighlightedCode } from "./hero-code";
 import { FadeUp, FadeInView } from "./animated";
-import { CollectionShape } from "./illustrations";
 import { CapabilityShelf } from "./tiles";
 import { FlowDiagram } from "./flow-diagram";
 import { Wordmark } from "./wordmark";
@@ -145,51 +144,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Two ways to collect ──────────────────────────────────────── */}
+      {/* ── Both directions ──────────────────────────────────────────
+          The two cards carry the rail itself, mirrored, because the pair of
+          figures is the argument: one topology, read either way. */}
       <section className="border-fd-border border-b">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <FadeInView>
             <span className="text-fd-muted-foreground font-mono text-[0.7rem] tracking-[0.18em] uppercase">
-              Collecting
+              Both directions
             </span>
             <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              Keep your customer, or hand them to us.
+              Money in, and money back out.
             </h2>
             <p className="text-fd-muted-foreground mt-4 max-w-lg text-balance">
-              The same money, the same settlement, the same webhook. The
-              difference is only where your customer is standing when they pay.
+              The same rail, the same settlement, the same webhook. What changes
+              is which way it runs.
             </p>
           </FadeInView>
 
-          <FadeInView delay={0.05} className="mt-4">
-            <FlowDiagram direction="collect" />
-          </FadeInView>
-
-          <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
             {[
               {
-                variant: "charge" as const,
-                path: "POST /v1/collect/charge",
-                title: "Charge a number",
-                body: "You already have their phone number. We push the prompt; they approve without leaving your app.",
-                needs: "You collect the number and network.",
+                key: "collect",
+                direction: "collect" as const,
+                paths: ["POST /v1/collect/charge", "POST /v1/collect/checkout"],
+                title: "Collect",
+                body: "Push a prompt straight to a number you already have, or hand the payer a hosted page and let them choose. The money settles the same way either way.",
+                needs: "You collect the number, or nothing at all.",
               },
               {
-                variant: "checkout" as const,
-                path: "POST /v1/collect/checkout",
-                title: "Hosted checkout",
-                body: "You get a link. They pick their own method on our page and come back when it is done.",
-                needs: "You collect nothing.",
+                key: "disburse",
+                direction: "disburse" as const,
+                paths: ["POST /v1/disburse"],
+                title: "Disburse",
+                body: "Settle a seller, pay a supplier, send a refund. You name the network and the number exactly as you do for a charge — the endpoint is what changes.",
+                needs: "Needs a key carrying the Disburse permission.",
               },
             ].map((c, i) => (
-              <FadeInView key={c.path} delay={i * 0.08}>
+              <FadeInView key={c.key} delay={i * 0.08}>
                 <div className="border-fd-border bg-fd-card hover:border-fd-primary/40 flex h-full flex-col rounded-xl border p-6 transition-colors sm:p-7">
-                  <div className="mb-7">
-                    <CollectionShape variant={c.variant} />
+                  <FlowDiagram direction={c.direction} compact />
+                  <div className="mt-6 flex flex-wrap gap-x-4 gap-y-1">
+                    {c.paths.map((path) => (
+                      <code
+                        key={path}
+                        className="text-fd-muted-foreground text-xs break-all"
+                      >
+                        {path}
+                      </code>
+                    ))}
                   </div>
-                  <code className="text-fd-muted-foreground text-xs break-all">
-                    {c.path}
-                  </code>
                   <h3 className="mt-3 text-lg font-medium">{c.title}</h3>
                   <p className="text-fd-muted-foreground mt-2 text-sm leading-relaxed text-balance">
                     {c.body}
@@ -204,7 +208,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── One request ──────────────────────────────────────────────── */}
       <section className="border-fd-border border-b">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
           <FadeInView>
@@ -269,12 +272,7 @@ export default function HomePage() {
             </p>
           </FadeInView>
 
-          {/* The same rail as the section above, read the other way. */}
-          <FadeInView delay={0.05} className="mt-4">
-            <FlowDiagram direction="disburse" />
-          </FadeInView>
-
-          <div className="mt-4 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+          <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <FadeInView className="lg:order-2">
               <dl className="space-y-3 text-sm">
                 {[
