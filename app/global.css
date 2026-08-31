@@ -122,108 +122,51 @@ body {
   background-color: transparent;
 }
 
-/* ── The hero's dot field ──────────────────────────────────────────────
-   Masked into a ring rather than laid flat: the middle is empty, so the dots
-   open away from the centre like the mouth of a cylinder with the glow sitting
-   down in the hollow. The mask fades in from the hole and out again at the rim,
-   so the field has no edge anywhere for the eye to catch.
+/* ── The hero's dot cylinder ───────────────────────────────────────────
+   Positioned from its own centre onto the glow's bright core — 50% 34%, and
+   50% 28% on a phone — rather than stretched across the section. Sharing a
+   centre is what makes the glow sit down inside the hollow rather than merely
+   near it; if the glow moves, this moves with it.
 
-   It breathes too — slowly enough to read as depth rather than a blink.
+   Square, so the rings stay circular whatever shape the band is. The section
+   clips whatever runs past its edges.
 
-   The centre is the glow's own bright core — 50% 34%, and 50% 28% on a phone —
-   not the middle of the section. Sharing a centre is what makes the glow sit
-   down inside the hollow rather than merely near it; if the glow moves, this
-   moves with it.
-
-   The radius is in rem, not a percentage: a percentage stop resolves against
-   the gradient's own farthest-corner radius, which on a band this wide would
-   push the ring off the bottom of the section entirely. */
+   The field breathes slowly — enough to read as depth, not as a blink. The
+   shape itself is drawn in dot-cylinder.tsx; only placement and movement are
+   here. */
 .hero-dots {
-  fill: rgb(255 255 255 / 0.55);
-  --hero-dots-mask: radial-gradient(
-    circle 32rem at 50% 34%,
-    transparent 0%,
-    transparent 24%,
-    rgb(0 0 0 / 0.5) 38%,
-    black 52%,
-    black 62%,
-    transparent 100%
-  );
-  -webkit-mask-image: var(--hero-dots-mask);
-  mask-image: var(--hero-dots-mask);
+  position: absolute;
+  left: 50%;
+  top: var(--cylinder-y, 34%);
+  width: var(--cylinder-size, 74rem);
+  height: var(--cylinder-size, 74rem);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  fill: rgb(255 255 255 / 0.42);
   animation: hero-dots-breathe 9s ease-in-out infinite;
 }
 
 @keyframes hero-dots-breathe {
   0%,
   100% {
-    opacity: 0.3;
+    opacity: 0.24;
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.58;
   }
 }
 
 @media (max-width: 40rem) {
   .hero-dots {
-    --hero-dots-mask: radial-gradient(
-      circle 13rem at 50% 28%,
-      transparent 0%,
-      transparent 24%,
-      rgb(0 0 0 / 0.5) 38%,
-      black 52%,
-      black 62%,
-      transparent 100%
-    );
+    --cylinder-y: 28%;
+    --cylinder-size: 34rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-dots {
     animation: none;
-    opacity: 0.5;
-  }
-}
-
-/* ── The rim beyond the dots ───────────────────────────────────────────
-   Sits on the same centre as the dot field and the glow, a little way outside
-   the dots' last ring, and bends away flat: an ellipse this much wider than it
-   is tall reads as a circle seen at a shallow angle, which is what gives the
-   hollow a mouth instead of an edge.
-
-   Faded off at the far left and right so only the top and bottom arcs survive.
-   Closed at the sides it would stop being a bend and go back to being a ring.
-
-   `vector-effect: non-scaling-stroke` in the markup keeps the line one weight
-   however the box is scaled — without it the stroke grows with the element and
-   the rim thickens into a band. */
-.hero-rim {
-  position: absolute;
-  left: 50%;
-  top: var(--rim-y, 34%);
-  width: var(--rim-size, 52rem);
-  height: var(--rim-size, 52rem);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  stroke: rgb(255 255 255 / 0.13);
-  stroke-width: 1;
-  --rim-mask: linear-gradient(
-    to right,
-    transparent 0%,
-    transparent 12%,
-    black 36%,
-    black 64%,
-    transparent 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: var(--rim-mask);
-  mask-image: var(--rim-mask);
-}
-
-@media (max-width: 40rem) {
-  .hero-rim {
-    --rim-y: 28%;
-    --rim-size: 23rem;
+    opacity: 0.4;
   }
 }
 

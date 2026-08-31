@@ -4,8 +4,7 @@ import { HighlightedCode } from "./hero-code";
 import { FadeUp, FadeInView } from "./animated";
 import { CapabilityShelf } from "./tiles";
 import { FlowDiagram } from "./flow-diagram";
-import { DotPattern } from "./dot-pattern";
-import { CylinderRim } from "./cylinder-rim";
+import { DotCylinder } from "./dot-cylinder";
 import { Wordmark } from "./wordmark";
 
 /**
@@ -75,13 +74,12 @@ export default function HomePage() {
           on the site — see `.hero-dark` in global.css, which redefines the
           theme tokens rather than restyling what sits inside it. */}
       <section className="border-fd-border relative overflow-hidden border-b">
-        {/* Four layers, back to front: the dot field, the rim that bends away
-            beyond it, the glow sitting in the hollow both leave, then the
-            content. The glow lives on its own element rather than on the
-            section — a background-image on the section paints under every
-            child, so nothing could ever get behind it there. */}
-        <DotPattern className="hero-dots" width={15} height={15} cr={0.7} />
-        <CylinderRim className="hero-rim" />
+        {/* Three layers, back to front: the dot cylinder, the glow sitting in
+            the hollow it leaves, then the content. The glow lives on its own
+            element rather than on the section — a background-image on the
+            section paints under every child, so nothing could get behind it
+            there. */}
+        <DotCylinder className="hero-dots" />
         <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
         {/* The nav floats inside the band, so the band has to start behind it:
             the section is pulled up by the nav’s height and the top padding
