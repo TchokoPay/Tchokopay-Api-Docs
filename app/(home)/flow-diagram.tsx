@@ -134,7 +134,7 @@ export function FlowDiagram({
             <img
               src="/favicon.png"
               alt="TchokoPay"
-              className={`rounded-full ${compact ? "size-7" : "size-9"}`}
+              className={`rounded-full ${compact ? "size-9" : "size-11"}`}
             />
           </Node>
         </div>
