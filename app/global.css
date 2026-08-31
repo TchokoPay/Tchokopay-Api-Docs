@@ -138,35 +138,35 @@ body {
   position: absolute;
   left: 50%;
   top: var(--cylinder-y, 34%);
-  width: var(--cylinder-size, 74rem);
-  height: var(--cylinder-size, 74rem);
+  width: var(--cylinder-size, 62rem);
+  height: var(--cylinder-size, 62rem);
   transform: translate(-50%, -50%);
   pointer-events: none;
-  fill: rgb(255 255 255 / 0.42);
+  fill: rgb(255 255 255 / 0.36);
   animation: hero-dots-breathe 9s ease-in-out infinite;
 }
 
 @keyframes hero-dots-breathe {
   0%,
   100% {
-    opacity: 0.24;
+    opacity: 0.2;
   }
   50% {
-    opacity: 0.58;
+    opacity: 0.5;
   }
 }
 
 @media (max-width: 40rem) {
   .hero-dots {
     --cylinder-y: 28%;
-    --cylinder-size: 34rem;
+    --cylinder-size: 29rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-dots {
     animation: none;
-    opacity: 0.4;
+    opacity: 0.34;
   }
 }
 
