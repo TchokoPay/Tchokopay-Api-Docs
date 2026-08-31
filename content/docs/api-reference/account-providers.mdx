@@ -1,12 +1,12 @@
 ---
-title: List channels
-description: GET /v1/channels — see what payment methods your customers can currently use.
+title: Your providers
+description: GET /v1/account/providers — see what payment methods your customers can currently use.
 icon: Radio
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">GET</span>
-  <code className="text-sm break-all">/v1/channels</code>
+  <code className="text-sm break-all">/v1/account/providers</code>
 </div>
 
 Lists every payin method your customers can currently use, platform-wide — useful if you
@@ -14,7 +14,7 @@ want to show a payer, in your own UI, what to expect before they even reach the 
 checkout page.
 
 ```bash
-curl https://connect.tchokopay.com/v1/channels \
+curl https://connect.tchokopay.com/v1/account/providers \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 

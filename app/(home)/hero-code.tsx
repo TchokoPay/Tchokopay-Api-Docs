@@ -33,9 +33,14 @@ export async function HighlightedCode({
   terminal?: boolean;
   className?: string;
 }) {
+  // Themes are deliberately not named here. fumadocs' defaults are already
+  // github-light/github-dark, but they arrive bundled with `defaultColor:
+  // false`, and it only applies that bundle when the caller names no theme at
+  // all. Passing the same two themes by hand therefore dropped the flag, shiki
+  // baked the light palette in as literal colours instead of the CSS variables
+  // the dark swap reads, and these blocks stayed white on a dark page.
   const rendered = await highlight(code, {
     lang,
-    themes: { light: 'github-light', dark: 'github-dark' },
     components: { pre: Pre },
   });
 

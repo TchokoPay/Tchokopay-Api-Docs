@@ -1,114 +1,187 @@
 ---
 title: Quickstart
-description: Create your first payment in under five minutes.
+description: A working call in five minutes.
 icon: Rocket
 ---
 
-## 1. Get an API key
+## 1. Get a key
 
-<Steps>
-<Step>
-Log in to your [TchokoPay merchant dashboard](https://tchokopay.com/merchant/developers)
-and go to **Developers**.
-</Step>
-<Step>
-Click **Generate API Key**. It's shown **once** — copy it somewhere safe. TchokoPay never
-stores the plaintext key and can't show it to you again.
-</Step>
-<Step>
-Your key looks like `tchoko_live_8f3a9c2e1b7d4f6a0e5c3b8d7a2f1e9c...`. Treat it like a
-password.
-</Step>
-</Steps>
+From your [merchant dashboard](https://tchokopay.com/merchant/developers) → **Developers**
+→ **New API key**. Tick **Collect**, and copy the key — it is shown once.
 
-## 2. Create a payment
+See [API keys](/docs/authentication) for choosing permissions properly.
 
-<Tabs items={['cURL', 'Node.js', 'Python']}>
-<Tab value="cURL">
+## 2. Check what you can use
+
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl https://connect.tchokopay.com/v1/account/providers \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+
+```json
+[
+  { "provider": "mtn_cm", "name": "MTN MoMo", "method": "MOBILE_MONEY", "country": "CM" },
+  { "provider": "orange_cm", "name": "Orange Money", "method": "MOBILE_MONEY", "country": "CM" }
+]
+```
+
+The `provider` values are what you send when collecting or disbursing. Build your network
+picker from this rather than hardcoding it.
+
+## 3. Take a payment
+
+Two ways. Try whichever fits your product.
+
+<Tabs items={['Charge a number', 'Hosted checkout']}>
+<Tab value="Charge a number">
+
+Your customer stays in your app and approves a prompt on their phone.
+
+```bash
+curl -X POST https://connect.tchokopay.com/v1/collect/charge \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-4821" \
+  -d '{
+    "amount": 5000,
+    "currency": "XAF",
+    "country": "CM",
+    "provider": "mtn_cm",
+    "phone": "670000000",
+    "merchantReference": "order_4821"
+  }'
+```
+
+```json
+{
+  "reference": "REQ-1788042194995-AB9B94",
+  "status": "PENDING",
+  "amount": 5000,
+  "currency": "XAF",
+  "provider": "mtn_cm",
+  "merchantReference": "order_4821",
+  "createdAt": "2026-08-29T22:23:15.010Z"
+}
+```
+
+The prompt is on its way. Nobody has paid yet — watch for the result in step 4.
+
+[Full reference →](/docs/api-reference/charge)
+
+</Tab>
+<Tab value="Hosted checkout">
+
+Your customer is redirected to a TchokoPay page and picks their own method.
+
+```bash
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-4821" \
   -d '{
     "amount": 5000,
     "currency": "XAF",
     "description": "Order #4821",
-    "reference": "order_4821"
+    "merchantReference": "order_4821"
   }'
 ```
-</Tab>
-<Tab value="Node.js">
-```js
-const res = await fetch('https://connect.tchokopay.com/v1/payments', {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    amount: 5000,
-    currency: 'XAF',
-    description: 'Order #4821',
-    reference: 'order_4821',
-  }),
-});
-
-const payment = await res.json();
-console.log(payment.checkoutUrl);
-```
-</Tab>
-<Tab value="Python">
-```python
-import os
-import requests
-
-response = requests.post(
-    "https://connect.tchokopay.com/v1/payments",
-    headers={"Authorization": f"Bearer {os.environ['TCHOKOPAY_API_KEY']}"},
-    json={
-        "amount": 5000,
-        "currency": "XAF",
-        "description": "Order #4821",
-        "reference": "order_4821",
-    },
-)
-response.raise_for_status()
-payment = response.json()
-print(payment["checkoutUrl"])
-```
-</Tab>
-</Tabs>
-
-## 3. Read the response
 
 ```json
 {
-  "reference": "REQ-1785296850838-A5303B",
+  "reference": "REQ-1788042194995-AB9B94",
   "status": "PENDING",
   "amount": 5000,
   "currency": "XAF",
-  "requestedAmount": 5000,
-  "requestedCurrency": "XAF",
-  "description": "Order #4821",
-  "merchantReference": "order_4821",
-  "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B",
-  "expiresAt": "2026-07-30T10:00:00.000Z",
-  "createdAt": "2026-07-30T09:00:00.000Z",
-  "failureCategory": null
+  "checkoutUrl": "https://tchokopay.com/pay/REQ-1788042194995-AB9B94",
+  "merchantReference": "order_4821"
 }
 ```
 
-## 4. Redirect your customer
+Send your customer to `checkoutUrl`.
 
-Send them to `checkoutUrl`. They pick their own payment method and complete the payment
-on TchokoPay's hosted page — no payment UI for you to build.
+[Full reference →](/docs/api-reference/create-checkout)
 
-## 5. Find out what happened
+</Tab>
+</Tabs>
 
-Either poll [`GET /v1/payments/:reference`](/docs/api-reference/get-payment), or set up a
-[webhook](/docs/guides/webhooks) once and get notified automatically.
+## 4. Find out what happened
 
-<Callout type="info">
-  Every field in this response is documented in full on the
-  [`POST /v1/payments` reference page](/docs/api-reference/create-payment).
+Either works. Webhooks are better — you find out the moment it resolves instead of asking.
+
+<Tabs items={['Webhook', 'Polling']}>
+<Tab value="Webhook">
+
+Register your endpoint once:
+
+```bash
+curl -X PUT https://connect.tchokopay.com/v1/webhook \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://yourapp.com/webhooks/tchokopay" }'
+```
+
+You get a signing secret back — shown once. Verify every delivery with it.
+
+[Setting up webhooks →](/docs/guides/webhooks)
+
+</Tab>
+<Tab value="Polling">
+
+```bash
+curl https://connect.tchokopay.com/v1/collect/REQ-1788042194995-AB9B94 \
+  -H "Authorization: Bearer tchoko_live_..."
+```
+
+```json
+{
+  "reference": "REQ-1788042194995-AB9B94",
+  "status": "SUCCESS",
+  "amount": 5000,
+  "currency": "XAF",
+  "providerCode": "mtn_cm"
+}
+```
+
+Every few seconds is plenty — the payer has minutes to approve.
+
+[Status lifecycle →](/docs/guides/status-lifecycle)
+
+</Tab>
+</Tabs>
+
+## 5. Send money out
+
+When you are ready to pay somebody from your balance. This needs a key with the
+**Disburse** permission — a separate one from the key above.
+
+```bash
+curl -X POST https://connect.tchokopay.com/v1/disburse \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: payout-8821" \
+  -d '{
+    "amount": 5000,
+    "currency": "XAF",
+    "country": "CM",
+    "provider": "mtn_cm",
+    "phone": "670000000",
+    "recipientName": "Amina Njoya",
+    "merchantReference": "supplier-invoice-8821"
+  }'
+```
+
+<Callout type="warn">
+  Always send an `Idempotency-Key` on a disbursement. A repeated request without one is a
+  second payment, and money that has left cannot be recalled.
 </Callout>
+
+[Full reference →](/docs/api-reference/create-disbursement)
+
+## Next
+
+<Cards>
+  <Card title="API keys" href="/docs/authentication" description="Permissions, and which key needs which." />
+  <Card title="Webhooks" href="/docs/guides/webhooks" description="Signature verification and event types." />
+  <Card title="Idempotency" href="/docs/guides/idempotency" description="Retry safely." />
+  <Card title="Errors" href="/docs/guides/errors-and-limits" description="Every code and what to do." />
+</Cards>

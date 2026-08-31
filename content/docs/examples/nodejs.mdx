@@ -1,81 +1,193 @@
 ---
-title: Node.js — full example
-description: Charge a customer and handle the webhook, end to end.
+title: Node.js
+description: Collecting, disbursing and handling webhooks, end to end.
 icon: FileCode
 ---
 
-A complete, minimal integration — creating a payment with an Express route, and
-confirming it with a verified webhook.
+A complete Express integration: both ways to collect, sending money out, and a verified
+webhook.
+
+## Setup
 
 ```js
 const express = require('express');
 const crypto = require('crypto');
 
 const app = express();
-const TCHOKO_KEY = process.env.TCHOKOPAY_API_KEY;
+const BASE = 'https://connect.tchokopay.com/v1';
+
+// Two keys, not one. See /docs/authentication.
+const COLLECT_KEY = process.env.TCHOKOPAY_COLLECT_KEY;
+const DISBURSE_KEY = process.env.TCHOKOPAY_DISBURSE_KEY;
 const WEBHOOK_SECRET = process.env.TCHOKOPAY_WEBHOOK_SECRET;
 
-async function chargeCustomer(orderId, amountXaf) {
-  const res = await fetch('https://connect.tchokopay.com/v1/payments', {
-    method: 'POST',
+async function call(path, { key, method = 'GET', body, idempotencyKey } = {}) {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
     headers: {
-      Authorization: `Bearer ${TCHOKO_KEY}`,
-      'Content-Type': 'application/json',
-      'Idempotency-Key': `charge-${orderId}`,
+      Authorization: `Bearer ${key}`,
+      ...(body ? { 'Content-Type': 'application/json' } : {}),
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
-    body: JSON.stringify({
-      amount: amountXaf,
-      currency: 'XAF',
-      description: `Order ${orderId}`,
-      reference: orderId,
-    }),
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(`TchokoPay error: ${err.message}`);
+    // Branch on `code`, never on the message — the wording can change.
+    const error = new Error(data.message);
+    error.code = data.code;
+    error.param = data.param;
+    error.requestId = data.requestId;
+    throw error;
   }
 
-  const payment = await res.json();
-  return payment.checkoutUrl; // redirect your customer here
+  return data;
+}
+```
+
+## Charging a number directly
+
+The customer stays in your app and approves a prompt on their phone.
+
+```js
+async function chargePhone(orderId, amount, { phone, provider, country }) {
+  return call('/collect/charge', {
+    key: COLLECT_KEY,
+    method: 'POST',
+    idempotencyKey: `order-${orderId}`,
+    body: {
+      amount,
+      currency: 'XAF',
+      country,
+      provider,
+      phone,
+      merchantReference: orderId,
+      description: `Order ${orderId}`,
+    },
+  });
 }
 
+app.post('/pay', express.json(), async (req, res) => {
+  try {
+    const charge = await chargePhone(req.body.orderId, 5000, {
+      phone: req.body.phone,
+      provider: req.body.provider, // from GET /v1/account/providers
+      country: 'CM',
+    });
+
+    // Returns immediately. Nobody has paid yet — wait for the webhook.
+    res.json({ reference: charge.reference, status: charge.status });
+  } catch (err) {
+    if (err.code === 'INVALID_REQUEST') {
+      return res.status(400).json({ message: err.message, field: err.param });
+    }
+    throw err;
+  }
+});
+```
+
+## Hosted checkout
+
+If you would rather not handle numbers or network selection.
+
+```js
+app.get('/checkout/:orderId', async (req, res) => {
+  const checkout = await call('/collect/checkout', {
+    key: COLLECT_KEY,
+    method: 'POST',
+    idempotencyKey: `order-${req.params.orderId}`,
+    body: {
+      amount: 5000,
+      currency: 'XAF',
+      description: `Order ${req.params.orderId}`,
+      reference: req.params.orderId,
+    },
+  });
+
+  res.redirect(checkout.checkoutUrl);
+});
+```
+
+## Building your network picker
+
+Fetch this once at start-up rather than hardcoding it.
+
+```js
+const providers = await call('/account/providers', { key: COLLECT_KEY });
+// [{ provider: 'mtn_cm', name: 'MTN MoMo', method: 'MOBILE_MONEY', country: 'CM' }, ...]
+
+// Show `name` to your customer; send `provider` back to us.
+```
+
+## Sending money out
+
+```js
+async function disburse(instructionId, amount, { phone, provider, country, name }) {
+  return call('/disburse', {
+    key: DISBURSE_KEY,
+    method: 'POST',
+    // Derive this from something stable in your own system. Never random —
+    // a retry must produce the same key, or it becomes a second payment.
+    idempotencyKey: `disburse-${instructionId}`,
+    body: {
+      amount,
+      currency: 'XAF',
+      country,
+      provider: provider,
+      phone: phone,
+      recipientName: name,
+      merchantReference: instructionId,
+    },
+  });
+}
+```
+
+## Verifying webhooks
+
+```js
 function verifyWebhook(rawBody, signatureHeader, timestampHeader, secret) {
+  const age = Math.abs(Date.now() / 1000 - Number(timestampHeader));
+  if (age > 300) return false; // stale — reject even if the signature matches
+
   const expected = crypto
     .createHmac('sha256', secret)
     .update(`${timestampHeader}.${rawBody}`)
     .digest('hex');
 
-  const provided = signatureHeader.replace('sha256=', '');
-  const valid = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
+  const provided = (signatureHeader || '').replace('sha256=', '');
+  if (expected.length !== provided.length) return false;
 
-  const age = Math.abs(Date.now() / 1000 - Number(timestampHeader));
-  if (age > 300) return false; // stale — reject even if the signature matches
-
-  return valid;
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
 }
 
-app.get('/checkout/:orderId', async (req, res) => {
-  const checkoutUrl = await chargeCustomer(req.params.orderId, 5000);
-  res.redirect(checkoutUrl);
-});
-
 app.post('/webhooks/tchokopay', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-tchokopay-signature'];
-  const timestamp = req.headers['x-tchokopay-timestamp'];
+  const raw = req.body.toString();
 
-  if (!verifyWebhook(req.body.toString(), signature, timestamp, WEBHOOK_SECRET)) {
+  if (!verifyWebhook(raw, req.headers['x-tchokopay-signature'], req.headers['x-tchokopay-timestamp'], WEBHOOK_SECRET)) {
     return res.status(400).send('invalid signature');
   }
 
-  const event = JSON.parse(req.body.toString());
+  const eventType = req.headers['x-tchokopay-event'];
+  const event = JSON.parse(raw);
 
-  if (event.status === 'SUCCESS') {
-    markOrderPaid(event.invoiceReference, event.settledAmount, event.settledCurrency);
-  } else if (event.status === 'FAILED') {
-    markOrderFailed(event.invoiceReference, event.failureReason);
+  switch (eventType) {
+    case 'collect.succeeded':
+      markOrderPaid(event.invoiceReference, event.settledAmount, event.settledCurrency);
+      break;
+    case 'collect.failed':
+      markOrderFailed(event.invoiceReference, event.failureReason);
+      break;
+    case 'disburse.succeeded':
+      markInstructionPaid(event.reference);
+      break;
+    case 'disburse.failed':
+      markInstructionFailed(event.reference, event.statusReason);
+      break;
   }
 
+  // Answer 2xx quickly. Do the slow work after.
   res.sendStatus(200);
 });
 
@@ -84,6 +196,11 @@ app.listen(3000);
 
 <Callout type="info">
   The webhook route uses `express.raw()`, not `express.json()` — signature verification
-  needs the exact raw bytes that were sent, before any parsing. See
-  [Webhooks](/docs/guides/webhooks#verifying-the-signature) for why this matters.
+  needs the exact bytes that were sent, before any parsing. See
+  [Webhooks](/docs/guides/webhooks#verifying-the-signature).
+</Callout>
+
+<Callout type="warn">
+  If your endpoint sits behind a redirect, register the final URL. We do not follow
+  redirects on webhook delivery, and a redirecting endpoint counts as a failed delivery.
 </Callout>

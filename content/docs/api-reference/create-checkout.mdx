@@ -1,12 +1,12 @@
 ---
-title: Create a payment
-description: POST /v1/payments — create a hosted checkout payment.
+title: Create a checkout
+description: POST /v1/collect/checkout — create a hosted checkout page and get a link.
 icon: CreditCard
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
-  <code className="text-sm break-all">/v1/payments</code>
+  <code className="text-sm break-all">/v1/collect/checkout</code>
 </div>
 
 Creates a payment and returns a hosted checkout link. Redirect your customer there —
@@ -17,7 +17,7 @@ they pick their own payment method and complete the payment on TchokoPay's page.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: order-4821-attempt-1" \
@@ -25,14 +25,14 @@ curl -X POST https://connect.tchokopay.com/v1/payments \
     "amount": 5000,
     "currency": "XAF",
     "description": "Order #4821",
-    "reference": "order_4821",
+    "merchantReference": "order_4821",
     "expiresInMinutes": 60
   }'
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
-const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+const res = await fetch('https://connect.tchokopay.com/v1/collect/checkout', {
   method: 'POST',
   headers: {
     Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
@@ -43,7 +43,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/payments', {
     amount: 5000,
     currency: 'XAF',
     description: 'Order #4821',
-    reference: 'order_4821',
+    merchantReference: 'order_4821',
     expiresInMinutes: 60,
   }),
 });
@@ -54,7 +54,7 @@ const payment = await res.json();
 <Tab value="Python">
 ```python
 response = requests.post(
-    "https://connect.tchokopay.com/v1/payments",
+    "https://connect.tchokopay.com/v1/collect/checkout",
     headers={
         "Authorization": f"Bearer {api_key}",
         "Idempotency-Key": "order-4821-attempt-1",
@@ -63,7 +63,7 @@ response = requests.post(
         "amount": 5000,
         "currency": "XAF",
         "description": "Order #4821",
-        "reference": "order_4821",
+        "merchantReference": "order_4821",
         "expiresInMinutes": 60,
     },
 )
@@ -79,7 +79,7 @@ payment = response.json()
 | `amount` | number | **required** | The amount, in `currency`. Decimals are allowed where the currency supports them (e.g. `49.99` for USD) — more precision than the currency actually has is rejected, not silently rounded. |
 | `currency` | string | **required** | Any active currency code — `XAF`, `USD`, `NGN`, `BTC`, etc. There's no fixed settlement currency to match — see [Multi-currency](/docs/guides/multi-currency). |
 | `description` | string | optional | Shown to the payer on the checkout page. Defaults to `"Payment to {your business name}"`. Max 200 characters. |
-| `reference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
+| `merchantReference` | string | optional | Your own order/invoice ID for your own reconciliation. Echoed back as `merchantReference`. Not used for routing or deduplication. Max 120 characters. |
 | `expiresInMinutes` | integer | optional | How long the checkout link stays payable. Default `60`, max `10080` (7 days). |
 
 ### Headers
@@ -105,6 +105,8 @@ payment = response.json()
   "description": "Order #4821",
   "merchantReference": "order_4821",
   "checkoutUrl": "https://tchokopay.com/pay/REQ-1785296850838-A5303B",
+  "method": null,
+  "providerCode": null,
   "expiresAt": "2026-07-30T10:00:00.000Z",
   "createdAt": "2026-07-30T09:00:00.000Z",
   "failureCategory": null
@@ -119,6 +121,8 @@ payment = response.json()
 | `requestedAmount` / `requestedCurrency` | The price **you asked for**, fixed for the life of the payment. |
 | `merchantReference` | Echoes back the `reference` you sent, or `null` if you didn't send one. |
 | `checkoutUrl` | Send your customer here. `null` once the payment is no longer payable. |
+| `method` | The payment class — `MOBILE_MONEY`, `CARD`, `CRYPTO`. `null` until your customer has chosen. It is the same value for every mobile money network, so it cannot tell you which one paid. |
+| `providerCode` | Which network actually paid — `mtn_cm`, `orange_cm`, `lightning`. `null` until your customer has chosen. **This is the field to branch on**, not `method`. |
 | `expiresAt` | When the checkout link stops accepting payment. |
 | `failureCategory` | `null` unless `status` is `FAILED` — see [Failure categories](/docs/guides/status-lifecycle#failure-categories). |
 

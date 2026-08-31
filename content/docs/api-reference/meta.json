@@ -1,13 +1,19 @@
 {
   "title": "API Reference",
   "pages": [
-    "create-payment",
-    "get-payment",
-    "list-channels",
-    "---Payouts---",
-    "create-payout",
-    "get-payout",
-    "payout-limits",
+    "---Discovery---",
+    "countries",
+    "providers",
+    "limits",
+    "account-providers",
+    "---Collect---",
+    "create-checkout",
+    "charge",
+    "get-collection",
+    "---Disburse---",
+    "create-disbursement",
+    "get-disbursement",
+    "disburse-limits",
     "---Setup---",
     "webhooks-endpoint"
   ]

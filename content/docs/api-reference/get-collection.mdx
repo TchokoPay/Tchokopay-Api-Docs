@@ -1,28 +1,28 @@
 ---
-title: Get a payment
-description: GET /v1/payments/:reference — check a payment's current status.
+title: Get a collection
+description: GET /v1/collect/{reference} — check a collection's current status.
 icon: Search
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">GET</span>
-  <code className="text-sm break-all">/v1/payments/:reference</code>
+  <code className="text-sm break-all">/v1/collect/:reference</code>
 </div>
 
 Returns the current state of a payment. Same response shape as
-[creating a payment](/docs/api-reference/create-payment).
+[creating a payment](/docs/api-reference/create-checkout).
 
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl https://connect.tchokopay.com/v1/payments/REQ-1785296850838-A5303B \
+curl https://connect.tchokopay.com/v1/collect/REQ-1785296850838-A5303B \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
 const res = await fetch(
-  `https://connect.tchokopay.com/v1/payments/${reference}`,
+  `https://connect.tchokopay.com/v1/collect/checkout/${reference}`,
   { headers: { Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}` } },
 );
 const payment = await res.json();
@@ -31,7 +31,7 @@ const payment = await res.json();
 <Tab value="Python">
 ```python
 response = requests.get(
-    f"https://connect.tchokopay.com/v1/payments/{reference}",
+    f"https://connect.tchokopay.com/v1/collect/{reference}",
     headers={"Authorization": f"Bearer {api_key}"},
 )
 payment = response.json()
@@ -41,7 +41,7 @@ payment = response.json()
 
 ## Response
 
-`200 OK` — identical shape to [`POST /v1/payments`](/docs/api-reference/create-payment#response).
+`200 OK` — identical shape to [`POST /v1/collect/checkout`](/docs/api-reference/create-checkout#response).
 
 Scoped to your own account: a reference that exists but belongs to another merchant
 returns `404`, exactly like a reference that doesn't exist at all — so this endpoint can
