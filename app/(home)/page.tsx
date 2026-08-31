@@ -149,14 +149,17 @@ export default function HomePage() {
           figures is the argument: one topology, read either way. */}
       <section className="border-fd-border border-b">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-          <FadeInView>
+          {/* Centred, unlike the sections below it: what follows is a
+              symmetrical pair, and a heading hard against the left edge fights
+              that. */}
+          <FadeInView className="text-center">
             <span className="text-fd-muted-foreground font-mono text-[0.7rem] tracking-[0.18em] uppercase">
               Both directions
             </span>
-            <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            <h2 className="mx-auto mt-4 max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
               Money in, and money back out.
             </h2>
-            <p className="text-fd-muted-foreground mt-4 max-w-lg text-balance">
+            <p className="text-fd-muted-foreground mx-auto mt-4 max-w-lg text-balance">
               The same rail, the same settlement, the same webhook. What changes
               is which way it runs.
             </p>
