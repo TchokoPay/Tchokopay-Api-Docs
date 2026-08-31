@@ -98,14 +98,14 @@ export default function HomePage() {
                 place that no longer suits the measure. */}
             <h1 className="mt-7 max-w-5xl bg-gradient-to-b from-white to-[#8ea0c6] bg-clip-text text-[2rem] leading-[1.08] font-semibold tracking-tight text-transparent text-balance sm:text-5xl lg:text-[3.75rem]">
               Start collecting and disbursing
-              <br className="hidden sm:inline" /> payments in five minutes.
+              <br className="hidden sm:inline" /> payments in 5 minutes.
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.1}>
-            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-3xl text-base leading-relaxed text-balance sm:text-lg">
-              One API for mobile money across Africa. Collect from any network
-              and pay anyone out — no operator integrations to build.
+            <p className="text-fd-muted-foreground mx-auto mt-5 max-w-3xl text-base leading-relaxed sm:text-lg">
+              One API for mobile money across Africa. Collect from any network,
+              pay anyone out, and leave the operator integrations to us.
             </p>
           </FadeUp>
 
