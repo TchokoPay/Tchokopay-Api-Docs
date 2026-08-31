@@ -122,61 +122,51 @@ body {
   background-color: transparent;
 }
 
-/* ── The hero's dot field ──────────────────────────────────────────────
-   Masked into a ring rather than laid flat: the middle is empty, so the dots
-   open away from the centre like the mouth of a cylinder with the glow sitting
-   down in the hollow. The mask fades in from the hole and out again at the rim,
-   so the field has no edge anywhere for the eye to catch.
+/* ── The hero's dot cylinder ───────────────────────────────────────────
+   Positioned from its own centre onto the glow's centre, rather than stretched
+   across the section and masked. The glow's mass sits at 50% 34% (50% 29% on a
+   phone), so that is where this goes — a shared centre is what makes the glow
+   look like it is sitting down inside the hollow rather than near it.
 
-   It breathes too — slowly enough to read as depth rather than a blink.
+   Square, so the rings stay circular whatever shape the band is. Its own
+   overflow is left to the section, which clips.
 
-   The radius is in rem, not a percentage: a percentage stop resolves against
-   the gradient's own farthest-corner radius, which on a band this wide would
-   push the ring off the bottom of the section entirely. */
+   The field breathes on a slow cycle — enough to read as depth, not as a
+   blink. The shape itself is drawn in dot-cylinder.tsx; only placement and
+   movement are here. */
 .hero-dots {
-  fill: rgb(255 255 255 / 0.55);
-  --hero-dots-mask: radial-gradient(
-    circle 44rem at 50% 44%,
-    transparent 0%,
-    transparent 24%,
-    rgb(0 0 0 / 0.5) 38%,
-    black 52%,
-    black 62%,
-    transparent 100%
-  );
-  -webkit-mask-image: var(--hero-dots-mask);
-  mask-image: var(--hero-dots-mask);
+  position: absolute;
+  left: 50%;
+  top: var(--cylinder-y, 34%);
+  width: var(--cylinder-size, 92rem);
+  height: var(--cylinder-size, 92rem);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  fill: rgb(255 255 255 / 0.4);
   animation: hero-dots-breathe 9s ease-in-out infinite;
 }
 
 @keyframes hero-dots-breathe {
   0%,
   100% {
-    opacity: 0.3;
+    opacity: 0.22;
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.55;
   }
 }
 
 @media (max-width: 40rem) {
   .hero-dots {
-    --hero-dots-mask: radial-gradient(
-      circle 17rem at 50% 33%,
-      transparent 0%,
-      transparent 24%,
-      rgb(0 0 0 / 0.5) 38%,
-      black 52%,
-      black 62%,
-      transparent 100%
-    );
+    --cylinder-y: 29%;
+    --cylinder-size: 44rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-dots {
     animation: none;
-    opacity: 0.5;
+    opacity: 0.38;
   }
 }
 
