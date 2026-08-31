@@ -1,10 +1,11 @@
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { HighlightedCode } from './hero-code';
-import { FadeUp, FadeInView } from './animated';
-import { CollectionShape } from './illustrations';
-import { CapabilityShelf } from './tiles';
-import { Wordmark } from './wordmark';
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { HighlightedCode } from "./hero-code";
+import { FadeUp, FadeInView } from "./animated";
+import { CollectionShape } from "./illustrations";
+import { CapabilityShelf } from "./tiles";
+import { FlowDiagram } from "./flow-diagram";
+import { Wordmark } from "./wordmark";
 
 /**
  * One typographic rule runs through this page: monospace is machine
@@ -39,24 +40,24 @@ const disburseSample = `curl -X POST https://connect.tchokopay.com/v1/disburse \
 
 const capabilities = [
   {
-    term: 'Idempotency-Key',
-    title: 'A retry is never a second payment',
-    body: 'Send the same key again and you get the original back — not a second prompt on your customer’s phone, and never a second disbursement.',
+    term: "Idempotency-Key",
+    title: "A retry is never a second payment",
+    body: "Send the same key again and you get the original back — not a second prompt on your customer’s phone, and never a second disbursement.",
   },
   {
-    term: 'X-TchokoPay-Signature',
-    title: 'Webhooks you can trust',
-    body: 'Every delivery is HMAC-signed with the timestamp bound in, so a captured payload cannot be replayed at you later.',
+    term: "X-TchokoPay-Signature",
+    title: "Webhooks you can trust",
+    body: "Every delivery is HMAC-signed with the timestamp bound in, so a captured payload cannot be replayed at you later.",
   },
   {
-    term: 'GET /v1/providers',
-    title: 'Nothing to hardcode',
-    body: 'Ask which countries, networks and amounts are live. Your integration keeps working as we open new markets.',
+    term: "GET /v1/providers",
+    title: "Nothing to hardcode",
+    body: "Ask which countries, networks and amounts are live. Your integration keeps working as we open new markets.",
   },
   {
-    term: 'scopes',
-    title: 'A key that cannot spend',
-    body: 'Keys carry fixed permissions. The one in your checkout collects and nothing else — it can never move money out.',
+    term: "scopes",
+    title: "A key that cannot spend",
+    body: "Keys carry fixed permissions. The one in your checkout collects and nothing else — it can never move money out.",
   },
 ];
 
@@ -80,7 +81,9 @@ export default function HomePage() {
         <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pt-[8.5rem] pb-20 text-center sm:px-6 sm:pt-[10.5rem] sm:pb-28 lg:pt-[11.5rem] lg:pb-32">
           <FadeUp>
             <div className="border-fd-border flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border bg-white/5 px-4 py-2 text-sm">
-              <span className="text-fd-muted-foreground">Live in 6+ countries across Africa</span>
+              <span className="text-fd-muted-foreground">
+                Live in 6+ countries across Africa
+              </span>
               <Link
                 href="/docs/api-reference/providers"
                 className="focus-visible:ring-fd-primary inline-flex items-center gap-1 font-medium transition-opacity hover:opacity-75 focus-visible:rounded-full focus-visible:ring-2 focus-visible:outline-none"
@@ -104,8 +107,8 @@ export default function HomePage() {
 
           <FadeUp delay={0.1}>
             <p className="text-fd-muted-foreground mx-auto mt-5 max-w-3xl text-base leading-relaxed sm:text-lg">
-              Plug us into your app or website. Collect from across Africa and the
-              world, and pay anyone out across the continent.
+              Plug us into your app or website. Collect from across Africa and
+              the world, and pay anyone out across the continent.
             </p>
           </FadeUp>
 
@@ -131,7 +134,10 @@ export default function HomePage() {
               cost the figures their detail. Below the breakpoint the shelf
               scrolls at full size instead, bleeding to both edges so it reads
               as more than the screen holds. */}
-          <FadeUp delay={0.2} className="-mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full">
+          <FadeUp
+            delay={0.2}
+            className="-mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full"
+          >
             <div className="mt-16 overflow-x-auto px-4 pb-4 sm:mt-20 sm:overflow-visible sm:px-0">
               <CapabilityShelf />
             </div>
@@ -150,26 +156,30 @@ export default function HomePage() {
               Keep your customer, or hand them to us.
             </h2>
             <p className="text-fd-muted-foreground mt-4 max-w-lg text-balance">
-              The same money, the same settlement, the same webhook. The difference is only
-              where your customer is standing when they pay.
+              The same money, the same settlement, the same webhook. The
+              difference is only where your customer is standing when they pay.
             </p>
           </FadeInView>
 
-          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <FadeInView delay={0.05} className="mt-4">
+            <FlowDiagram direction="collect" />
+          </FadeInView>
+
+          <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
             {[
               {
-                variant: 'charge' as const,
-                path: 'POST /v1/collect/charge',
-                title: 'Charge a number',
-                body: 'You already have their phone number. We push the prompt; they approve without leaving your app.',
-                needs: 'You collect the number and network.',
+                variant: "charge" as const,
+                path: "POST /v1/collect/charge",
+                title: "Charge a number",
+                body: "You already have their phone number. We push the prompt; they approve without leaving your app.",
+                needs: "You collect the number and network.",
               },
               {
-                variant: 'checkout' as const,
-                path: 'POST /v1/collect/checkout',
-                title: 'Hosted checkout',
-                body: 'You get a link. They pick their own method on our page and come back when it is done.',
-                needs: 'You collect nothing.',
+                variant: "checkout" as const,
+                path: "POST /v1/collect/checkout",
+                title: "Hosted checkout",
+                body: "You get a link. They pick their own method on our page and come back when it is done.",
+                needs: "You collect nothing.",
               },
             ].map((c, i) => (
               <FadeInView key={c.path} delay={i * 0.08}>
@@ -177,7 +187,9 @@ export default function HomePage() {
                   <div className="mb-7">
                     <CollectionShape variant={c.variant} />
                   </div>
-                  <code className="text-fd-muted-foreground text-xs break-all">{c.path}</code>
+                  <code className="text-fd-muted-foreground text-xs break-all">
+                    {c.path}
+                  </code>
                   <h3 className="mt-3 text-lg font-medium">{c.title}</h3>
                   <p className="text-fd-muted-foreground mt-2 text-sm leading-relaxed text-balance">
                     {c.body}
@@ -203,17 +215,25 @@ export default function HomePage() {
               A payment is one request.
             </h2>
             <p className="text-fd-muted-foreground mt-4 max-w-md text-balance">
-              Flat body, no nesting, nothing inferred. You name the country, the network and
-              the number — we never guess which, because a guessed network sends a prompt
-              nobody can answer.
+              Flat body, no nesting, nothing inferred. You name the country, the
+              network and the number — we never guess which, because a guessed
+              network sends a prompt nobody can answer.
             </p>
             <dl className="mt-8 space-y-3 text-sm">
               {[
-                ['202', 'Returns immediately. The prompt is on its way.'],
-                ['collect.succeeded', 'Arrives at your webhook the moment it clears.'],
+                ["202", "Returns immediately. The prompt is on its way."],
+                [
+                  "collect.succeeded",
+                  "Arrives at your webhook the moment it clears.",
+                ],
               ].map(([k, v]) => (
-                <div key={k} className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-                  <dt className="text-fd-primary shrink-0 font-mono text-xs sm:w-40 sm:pt-0.5">{k}</dt>
+                <div
+                  key={k}
+                  className="flex flex-col gap-1 sm:flex-row sm:gap-4"
+                >
+                  <dt className="text-fd-primary shrink-0 font-mono text-xs sm:w-40 sm:pt-0.5">
+                    {k}
+                  </dt>
                   <dd className="text-fd-muted-foreground">{v}</dd>
                 </div>
               ))}
@@ -234,40 +254,62 @@ export default function HomePage() {
 
       {/* ── Disbursing ───────────────────────────────────────────────── */}
       <section className="border-fd-border border-b">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
-          <FadeInView className="lg:order-2">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+          <FadeInView>
             <span className="text-fd-muted-foreground font-mono text-[0.7rem] tracking-[0.18em] uppercase">
               Disbursing
             </span>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
               The same body, the other direction.
             </h2>
             <p className="text-fd-muted-foreground mt-4 max-w-md text-balance">
-              Settle a seller, pay a supplier, send a refund. You name the network and the
-              number exactly as you do for a charge — the endpoint is what changes.
+              Settle a seller, pay a supplier, send a refund. You name the
+              network and the number exactly as you do for a charge — the
+              endpoint is what changes.
             </p>
-            <dl className="mt-8 space-y-3 text-sm">
-              {[
-                ['POST /v1/disburse', 'Money leaves your balance for any number on a supported network.'],
-                ['disburse.succeeded', 'Fires when the recipient is credited, not when we accept the request.'],
-              ].map(([k, v]) => (
-                <div key={k} className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-                  <dt className="text-fd-primary shrink-0 font-mono text-xs sm:w-40 sm:pt-0.5">{k}</dt>
-                  <dd className="text-fd-muted-foreground">{v}</dd>
-                </div>
-              ))}
-            </dl>
           </FadeInView>
 
-          <FadeInView delay={0.1} className="lg:order-1">
-            <HighlightedCode
-              code={disburseSample}
-              lang="bash"
-              title="disburse.sh"
-              terminal
-              className="shadow-xl shadow-black/[0.03] dark:shadow-black/20"
-            />
+          {/* The same rail as the section above, read the other way. */}
+          <FadeInView delay={0.05} className="mt-4">
+            <FlowDiagram direction="disburse" />
           </FadeInView>
+
+          <div className="mt-4 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+            <FadeInView className="lg:order-2">
+              <dl className="space-y-3 text-sm">
+                {[
+                  [
+                    "POST /v1/disburse",
+                    "Money leaves your balance for any number on a supported network.",
+                  ],
+                  [
+                    "disburse.succeeded",
+                    "Fires when the recipient is credited, not when we accept the request.",
+                  ],
+                ].map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="flex flex-col gap-1 sm:flex-row sm:gap-4"
+                  >
+                    <dt className="text-fd-primary shrink-0 font-mono text-xs sm:w-40 sm:pt-0.5">
+                      {k}
+                    </dt>
+                    <dd className="text-fd-muted-foreground">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </FadeInView>
+
+            <FadeInView delay={0.1} className="lg:order-1">
+              <HighlightedCode
+                code={disburseSample}
+                lang="bash"
+                title="disburse.sh"
+                terminal
+                className="shadow-xl shadow-black/[0.03] dark:shadow-black/20"
+              />
+            </FadeInView>
+          </div>
         </div>
       </section>
 
@@ -284,7 +326,9 @@ export default function HomePage() {
             {capabilities.map((f, i) => (
               <FadeInView key={f.term} delay={(i % 2) * 0.06}>
                 <div className="border-fd-border flex flex-col gap-2 border-t py-7">
-                  <dt className="text-fd-primary font-mono text-xs break-all">{f.term}</dt>
+                  <dt className="text-fd-primary font-mono text-xs break-all">
+                    {f.term}
+                  </dt>
                   <dd>
                     <p className="font-medium">{f.title}</p>
                     <p className="text-fd-muted-foreground mt-1.5 text-sm leading-relaxed text-balance">
@@ -333,10 +377,16 @@ export default function HomePage() {
           <div className="text-fd-muted-foreground flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
             <span>© {new Date().getFullYear()} TchokoPay</span>
             <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-              <Link href="/docs" className="hover:text-fd-foreground transition-colors">
+              <Link
+                href="/docs"
+                className="hover:text-fd-foreground transition-colors"
+              >
                 Documentation
               </Link>
-              <Link href="/docs/api-reference/charge" className="hover:text-fd-foreground transition-colors">
+              <Link
+                href="/docs/api-reference/charge"
+                className="hover:text-fd-foreground transition-colors"
+              >
                 API reference
               </Link>
               <Link
@@ -345,7 +395,10 @@ export default function HomePage() {
               >
                 Dashboard
               </Link>
-              <a href="mailto:tech@tchokopay.com" className="hover:text-fd-foreground transition-colors">
+              <a
+                href="mailto:tech@tchokopay.com"
+                className="hover:text-fd-foreground transition-colors"
+              >
                 tech@tchokopay.com
               </a>
             </nav>
