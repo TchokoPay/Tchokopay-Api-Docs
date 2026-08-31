@@ -9,9 +9,11 @@ import { AnimatedBeam } from "./animated-beam";
  *
  * One component draws both directions, because there is only one topology: the
  * networks on one side, the merchant on the other, and us in the middle. Money
- * in runs left to right; money out is the same picture with the ends swapped
- * and the pulses reversed. That the two figures are mirror images is the point
- * — it is the same rail either way.
+ * in runs left to right; money out is the same picture with the ends swapped.
+ * Nothing about the beams changes — the gradient sweeps left to right in screen
+ * space regardless of which end a path was declared from, so mirroring the
+ * columns is the whole flip. That the two figures are mirror images is the
+ * point: it is the same rail either way.
  *
  * The networks named here are real ones we hold integrations to in live
  * countries. MTN and Orange carry their own colours because those are the two
@@ -142,30 +144,21 @@ export function FlowDiagram({
         {collecting ? merchantColumn : networkColumn}
       </div>
 
-      {/* The fan: every network to the hub. Staggered so the pulses read as
-          separate payments rather than one wave. */}
+      {/* Every beam is declared the same way in both directions, and none of
+          them is reversed: the mirrored columns above are what turns money in
+          into money out. Every beam also runs on the same clock, so the charge
+          leaves all five nodes at once rather than trickling round the fan. */}
       <div className="text-fd-foreground">
         {networks.map((ref, i) => (
           <AnimatedBeam
             key={NETWORKS[i].label}
             containerRef={container}
-            fromRef={collecting ? ref : hub}
-            toRef={collecting ? hub : ref}
-            curvature={0}
-            reverse={!collecting}
-            duration={4.2}
-            delay={i * 0.55}
+            fromRef={ref}
+            toRef={hub}
+            duration={3}
           />
         ))}
-        {/* And the single line to the other side. */}
-        <AnimatedBeam
-          containerRef={container}
-          fromRef={collecting ? hub : merchant}
-          toRef={collecting ? merchant : hub}
-          reverse={!collecting}
-          duration={4.2}
-          delay={collecting ? 1.2 : 0}
-        />
+        <AnimatedBeam containerRef={container} fromRef={hub} toRef={merchant} duration={3} />
       </div>
     </div>
   );

@@ -13,8 +13,12 @@ import { useEffect, useId, useState, type RefObject } from 'react';
  * nodes they connect are ordinary DOM and render regardless, so what a reader
  * without JavaScript loses is the wiring, not the content.
  *
- * `reverse` runs the pulse the other way, which is the whole trick behind
- * showing collection and disbursement with one component.
+ * There is deliberately no `reverse` prop. The gradient sweeps left to right in
+ * screen space whatever order the path was declared in, so the pulse's
+ * direction is a property of the LAYOUT: put the source column on the left and
+ * it flows outward, mirror the columns and the same beams flow the other way.
+ * Reversing the sweep as well as mirroring the layout flips it twice and sends
+ * the money back where it came from.
  */
 export interface AnimatedBeamProps {
   containerRef: RefObject<HTMLElement | null>;
@@ -22,7 +26,6 @@ export interface AnimatedBeamProps {
   toRef: RefObject<HTMLElement | null>;
   /** Bow in the line, in px. Positive lifts the middle. */
   curvature?: number;
-  reverse?: boolean;
   duration?: number;
   delay?: number;
   pathWidth?: number;
@@ -34,8 +37,7 @@ export function AnimatedBeam({
   fromRef,
   toRef,
   curvature = 0,
-  reverse = false,
-  duration = 4.5,
+  duration = 3,
   delay = 0,
   pathWidth = 1.4,
 }: AnimatedBeamProps) {
@@ -80,9 +82,7 @@ export function AnimatedBeam({
   }, [containerRef, fromRef, toRef, curvature]);
 
   // The pulse is a narrow gradient swept across the line's own bounding box.
-  const sweep = reverse
-    ? { x1: ['100%', '-25%'], x2: ['125%', '0%'] }
-    : { x1: ['-25%', '100%'], x2: ['0%', '125%'] };
+  const sweep = { x1: ['-25%', '100%'], x2: ['0%', '125%'] };
 
   return (
     <svg
@@ -114,7 +114,7 @@ export function AnimatedBeam({
                 duration,
                 ease: 'linear',
                 repeat: Infinity,
-                repeatDelay: 0.6,
+                repeatDelay: 0,
               }}
             >
               <stop stopColor="var(--color-fd-primary)" stopOpacity="0" />
