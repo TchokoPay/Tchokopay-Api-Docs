@@ -123,25 +123,25 @@ body {
 }
 
 /* The glow behind the hero.
-   Not one circle. A single radial gradient reads as a disc with an edge, and a
-   disc is a shape rather than weather. This is four overlapping lobes at
-   different sizes, centres and depths, so their union is lopsided the way a
-   real cloud is while the mass still sits on the page's centre line.
+   Round, but not a compass circle. The core is a near-circular ellipse — a
+   touch wider than tall — with one small lobe pushed off-centre to break the
+   arc, and a soft halo settling the whole thing a shade off-axis. Enough
+   asymmetry that the eye reads weather rather than a CSS disc, not so much
+   that it stops being round.
 
-   Every lobe ends on the same blue at zero alpha rather than on `transparent`.
+   Sized in rem rather than percentages: percentage radii are measured against
+   the element, so they stretch with the band and turn a round glow into a
+   smear on a wide viewport.
+
+   Every stop ends on the same blue at zero alpha rather than on `transparent`.
    `transparent` is transparent BLACK, so interpolating toward it drags a grey
-   cast through the middle of each fade — which on overlapping layers shows up
-   as dirty seams where they cross. */
+   cast through the fade, and across overlapping layers that reads as dirty
+   seams where they cross. */
 .hero-glow {
   background-image:
-    /* the upper-right lobe, brightest and highest */
-    radial-gradient(42% 34% at 61% 27%, rgb(78 128 255 / 0.32) 0%, rgb(78 128 255 / 0.12) 46%, rgb(78 128 255 / 0) 74%),
-    /* the main mass, slightly left of centre */
-    radial-gradient(56% 46% at 45% 38%, rgb(59 109 255 / 0.34) 0%, rgb(59 109 255 / 0.15) 48%, rgb(59 109 255 / 0) 78%),
-    /* a deeper lobe falling away to the lower left */
-    radial-gradient(48% 34% at 34% 55%, rgb(37 84 214 / 0.26) 0%, rgb(37 84 214 / 0.1) 50%, rgb(37 84 214 / 0) 78%),
-    /* a wide faint halo holding the three together */
-    radial-gradient(78% 62% at 50% 40%, rgb(47 106 255 / 0.12) 0%, rgb(47 106 255 / 0) 82%);
+    radial-gradient(14rem 13rem at 57% 31%, rgb(78 128 255 / 0.16) 0%, rgb(78 128 255 / 0) 72%),
+    radial-gradient(20rem 18rem at 48% 39%, rgb(59 109 255 / 0.3) 0%, rgb(59 109 255 / 0.12) 46%, rgb(59 109 255 / 0) 76%),
+    radial-gradient(29rem 26rem at 51% 41%, rgb(47 106 255 / 0.1) 0%, rgb(47 106 255 / 0) 80%);
 }
 
 /* ── Nav labels that roll over ─────────────────────────────────────────
