@@ -141,7 +141,7 @@ body {
 .hero-dots {
   fill: rgb(255 255 255 / 0.55);
   --hero-dots-mask: radial-gradient(
-    circle 44rem at 50% 34%,
+    circle 32rem at 50% 34%,
     transparent 0%,
     transparent 24%,
     rgb(0 0 0 / 0.5) 38%,
@@ -167,7 +167,7 @@ body {
 @media (max-width: 40rem) {
   .hero-dots {
     --hero-dots-mask: radial-gradient(
-      circle 17rem at 50% 28%,
+      circle 13rem at 50% 28%,
       transparent 0%,
       transparent 24%,
       rgb(0 0 0 / 0.5) 38%,
@@ -182,6 +182,48 @@ body {
   .hero-dots {
     animation: none;
     opacity: 0.5;
+  }
+}
+
+/* ── The rim beyond the dots ───────────────────────────────────────────
+   Sits on the same centre as the dot field and the glow, a little way outside
+   the dots' last ring, and bends away flat: an ellipse this much wider than it
+   is tall reads as a circle seen at a shallow angle, which is what gives the
+   hollow a mouth instead of an edge.
+
+   Faded off at the far left and right so only the top and bottom arcs survive.
+   Closed at the sides it would stop being a bend and go back to being a ring.
+
+   `vector-effect: non-scaling-stroke` in the markup keeps the line one weight
+   however the box is scaled — without it the stroke grows with the element and
+   the rim thickens into a band. */
+.hero-rim {
+  position: absolute;
+  left: 50%;
+  top: var(--rim-y, 34%);
+  width: var(--rim-size, 52rem);
+  height: var(--rim-size, 52rem);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  stroke: rgb(255 255 255 / 0.13);
+  stroke-width: 1;
+  --rim-mask: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 12%,
+    black 36%,
+    black 64%,
+    transparent 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--rim-mask);
+  mask-image: var(--rim-mask);
+}
+
+@media (max-width: 40rem) {
+  .hero-rim {
+    --rim-y: 28%;
+    --rim-size: 23rem;
   }
 }
 
