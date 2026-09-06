@@ -28,9 +28,10 @@ Every error has the same shape:
 
 ```json
 {
-  "code": "INVALID_REQUEST",
-  "message": "Amount is below the XAF minimum of 100.",
+  "code": "INSUFFICIENT_BALANCE",
+  "message": "Insufficient balance. You have 100 XAF, this needs 5250 XAF.",
   "param": "amount",
+  "details": { "currency": "XAF", "available": 100, "required": 5250 },
   "requestId": "8e281c99-05b6-4fc3-ba79-58c55198b40b"
 }
 ```
@@ -40,6 +41,7 @@ Every error has the same shape:
 | `code` | **Branch on this.** Stable, and it will not change when somebody rewords a sentence. |
 | `message` | Written to be shown to a person as-is. Never a contract — treat the wording as free to change. |
 | `param` | The field at fault, when the failure is about one. Absent otherwise. |
+| `details` | The numbers behind the message, so you never have to parse the sentence. Present on balance and amount failures. Absent otherwise. |
 | `requestId` | Also returned as the `X-Request-Id` header. Quote it to support and they can find the exact call. |
 
 <Callout type="warn">
@@ -51,12 +53,43 @@ Every error has the same shape:
 
 | `code` | Meaning |
 |---|---|
-| `INVALID_REQUEST` | Something in the request is wrong — bad amount, unknown currency, a number that doesn't match the provider, a field that shouldn't be there. `param` usually names it. |
+| **Access** | |
 | `UNAUTHORIZED` | Key missing, invalid, or revoked. |
-| `FORBIDDEN` | Your key lacks the scope, your account isn't approved, or a provider isn't enabled for you. The message says which. |
-| `NOT_FOUND` | No such reference — or it belongs to another account. Identical either way, so you can't use it to probe. |
+| `MERCHANT_NOT_APPROVED` | Your account is not in a state that can transact. |
+| `INSUFFICIENT_SCOPE` | The key is real but was not issued this scope. Generate one that has it. |
+| `CAPABILITY_DISABLED` | Switched off for everybody, not for you. Nothing to fix on your side. |
+| `PROVIDER_BLOCKED` | Your account is restricted from that network. |
+| **Request** | |
+| `INVALID_REQUEST` | Failed validation. `param` names the field. |
+| `IDEMPOTENCY_KEY_REQUIRED` | Payouts need one. Send a unique `Idempotency-Key`. |
+| `IDEMPOTENCY_KEY_TOO_LONG` | 200 characters or fewer. |
+| **Currency, country, network** | |
+| `UNKNOWN_CURRENCY` | Not a currency we support. See `GET /v1/limits`. |
+| `CURRENCY_MISMATCH` | The currency is not the one that country uses. `details` carries `expected`. |
+| `UNKNOWN_PROVIDER` | Not a provider you can use. See `GET /v1/account/providers`. |
+| `PROVIDER_COUNTRY_MISMATCH` | That network does not operate in that country. |
+| `COUNTRY_NOT_SUPPORTED` | We cannot place mobile numbers there. |
+| `PHONE_NOT_RECOGNISED` | Not a mobile money number we recognise in that country. |
+| `PHONE_PROVIDER_MISMATCH` | A number we can place, but not on the network you named. |
+| **Amount and balance** | |
+| `AMOUNT_TOO_SMALL` | Below the currency minimum. `details.minimum`. |
+| `AMOUNT_TOO_LARGE` | Above the currency maximum. `details.maximum`. |
+| `AMOUNT_PRECISION` | More decimal places than the currency has. |
+| `INSUFFICIENT_BALANCE` | Not enough in that wallet. `details.available` and `details.required`. |
+| `PAYOUT_LIMIT_EXCEEDED` | Past a per-payout, daily or weekly ceiling set on your account. |
+| `PAYOUTS_NOT_CONFIGURED` | Payouts are not enabled for that currency on your account. |
+| **Flow** | |
+| `NOT_FOUND` | No such reference, or it belongs to another account. Identical either way, so you cannot use it to probe. |
+| `RECIPIENT_BUSY` | That number has had enough payment prompts for now. Wait and retry. |
 | `RATE_LIMITED` | Too many requests. See below. |
 | `SERVER_ERROR` | Ours. Retry, and quote the `requestId` if it persists. |
+
+<Callout>
+  A currency is tied to its country. `XOF` with a Cameroonian network is
+  `CURRENCY_MISMATCH`, not a conversion. XAF and XOF are both called the CFA franc and
+  are pegged to the euro at the same rate, but they are different money and each has its
+  own balance.
+</Callout>
 
 Only one error is reported per request — the first thing wrong, so you have one thing to
 fix rather than a list to work through.
