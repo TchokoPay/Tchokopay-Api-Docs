@@ -9,7 +9,7 @@ There's no account-level "settlement currency" to match — every payment settle
 independently, in whatever currency your customer actually pays with.
 
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -37,7 +37,7 @@ converted yet:
 ## After payment, `amount`/`currency` reflect what actually settled
 
 Say your customer pays with Bitcoin. Once payment completes,
-`GET /v1/payments/:reference` returns:
+`GET /v1/collect/:reference` returns:
 
 ```json
 {

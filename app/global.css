@@ -9,6 +9,10 @@
      Tailwind's default system-ui stack everywhere font-sans is used. */
   --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
 
+  /* The page reads mono as "this is a machine's word" — an endpoint, a status,
+     a reference, a scope. Given that job it is a chosen face, not a fallback. */
+  --font-mono: var(--font-mono-brand), ui-monospace, 'SFMono-Regular', monospace;
+
   /* Tailwind's default jump from no-breakpoint to `sm` (640px) is too big
      for "stack two buttons until there's room to sit side by side" — most
      phones (375-428px wide) have room for two short buttons in a row well
@@ -57,10 +61,295 @@ body {
   max-width: 100%;
 }
 
-/* Subtle dot-grid used behind the landing hero — CSS only, no image asset,
-   themed for both light/dark via currentColor + low opacity. */
-.bg-grid-pattern {
-  background-image: radial-gradient(circle, var(--color-fd-foreground) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.06;
+/* ── The landing page, as one charcoal surface ─────────────────────────
+   The marketing page is committed dark whatever theme the reader is in — it is
+   the one place on the site that gets to be a poster rather than a document —
+   and it is a single ground from the nav to the wordmark, so nothing seams.
+
+   Rather than dark-specific markup on every element, the fumadocs tokens are
+   redefined for this subtree; everything already built against them comes out
+   right unchanged. `--accent-solid` is separate from `--color-fd-primary`
+   because the two do different jobs on a dark ground: one is a ground that has
+   to carry white text, the other is text that has to stay legible against it.
+   Scoped to `#nd-home-layout`, which fumadocs puts on the marketing layout
+   only, so the docs keep their own light/dark behaviour. */
+#nd-home-layout {
+  --color-fd-background: #0d0e11;
+  --color-fd-foreground: #f2f4f8;
+  --color-fd-muted-foreground: #99a1b3;
+  --color-fd-primary: #7fa5ff;
+  --color-fd-border: rgb(255 255 255 / 0.1);
+  --color-fd-card: rgb(255 255 255 / 0.03);
+  --color-fd-secondary: rgb(255 255 255 / 0.07);
+  --color-fd-secondary-foreground: #f2f4f8;
+  --color-fd-muted: rgb(255 255 255 / 0.06);
+  --color-fd-accent: rgb(255 255 255 / 0.09);
+  --color-fd-accent-foreground: #f2f4f8;
+  --accent-solid: #3b6dff;
+  --accent-solid-hover: #2f5ce6;
+
+  background-color: var(--color-fd-background);
+  color: var(--color-fd-foreground);
+}
+
+/* Shiki writes both palettes as custom properties and fumadocs picks between
+   them with the `.dark` class on the document. This page is dark without that
+   class ever being set, so a reader in light mode would get white code blocks
+   on a charcoal page. Take the dark half explicitly here. */
+#nd-home-layout figure.shiki {
+  background-color: var(--shiki-dark-bg);
+}
+
+#nd-home-layout .shiki code span,
+#nd-home-layout code.shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}
+
+/* The nav is a pill floating inside the page rather than a bar spanning the
+   top, and it carries no fill of its own — the blur alone separates it from
+   whatever scrolls beneath. */
+#nd-home-layout #nd-nav {
+  top: 0.875rem;
+  padding-inline: 1rem;
+}
+
+#nd-home-layout #nd-nav > div {
+  max-width: 80rem;
+  margin-inline: auto;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 9999px;
+  background-color: transparent;
+}
+
+/* ── The hero's dot field ──────────────────────────────────────────────
+   Masked into a ring rather than laid flat: the middle is empty, so the dots
+   open away from the centre like the mouth of a cylinder with the glow sitting
+   down in the hollow. The mask fades in from the hole and out again at the rim,
+   so the field has no edge anywhere for the eye to catch.
+
+   It breathes too — slowly enough to read as depth rather than a blink.
+
+   The centre is the glow's own bright core — 50% 34%, and 50% 28% on a phone —
+   not the middle of the section. Sharing a centre is what makes the glow sit
+   down inside the hollow rather than merely near it; if the glow moves, this
+   moves with it.
+
+   The radius is in rem, not a percentage: a percentage stop resolves against
+   the gradient's own farthest-corner radius, which on a band this wide would
+   push the ring off the bottom of the section entirely. */
+.hero-dots {
+  fill: rgb(255 255 255 / 0.55);
+  --hero-dots-mask: radial-gradient(
+    circle 36rem at 50% 34%,
+    transparent 0%,
+    transparent 24%,
+    rgb(0 0 0 / 0.5) 38%,
+    black 52%,
+    black 62%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--hero-dots-mask);
+  mask-image: var(--hero-dots-mask);
+  animation: hero-dots-breathe 9s ease-in-out infinite;
+}
+
+@keyframes hero-dots-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 40rem) {
+  .hero-dots {
+    --hero-dots-mask: radial-gradient(
+      circle 14rem at 50% 28%,
+      transparent 0%,
+      transparent 24%,
+      rgb(0 0 0 / 0.5) 38%,
+      black 52%,
+      black 62%,
+      transparent 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-dots {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* The glow behind the hero.
+   Three passes, and the trick to their reading as one cloud rather than three
+   discs is that they share a single colour and differ only in alpha. Layers in
+   different blues meet at a visible line, because the eye finds the hue change
+   long before it finds the opacity change.
+
+   Each pass also runs its own long falloff to zero at 100% instead of stopping
+   short. A stop that reaches zero at 76% leaves a faint ring at the radius
+   where it lands; carried all the way out, the layers dissolve into each other
+   with no edge to find. The middle pass is barely there and pushed off-centre
+   — enough to skew the mass so the silhouette is not a compass circle, too
+   faint to read as a shape of its own.
+
+   Sized in rem, not percentages: percentage radii are measured against the
+   element, so on a wide band they stretch and a round glow becomes a smear.
+
+   Every stop ends on the same blue at zero alpha rather than on `transparent`.
+   `transparent` is transparent BLACK, so interpolating toward it drags grey
+   through the fade — which across overlapping layers is exactly the dirty seam
+   this is trying to avoid. */
+.hero-glow {
+  background-image:
+    radial-gradient(
+      30rem 26rem at 56% 29%,
+      rgb(64 110 250 / 0.14) 0%,
+      rgb(64 110 250 / 0.08) 45%,
+      rgb(64 110 250 / 0.03) 72%,
+      rgb(64 110 250 / 0) 100%
+    ),
+    radial-gradient(
+      28rem 25rem at 50% 34%,
+      rgb(64 110 250 / 0.44) 0%,
+      rgb(64 110 250 / 0.34) 22%,
+      rgb(64 110 250 / 0.22) 42%,
+      rgb(64 110 250 / 0.11) 62%,
+      rgb(64 110 250 / 0.04) 80%,
+      rgb(64 110 250 / 0) 100%
+    ),
+    radial-gradient(
+      56rem 46rem at 50% 38%,
+      rgb(64 110 250 / 0.12) 0%,
+      rgb(64 110 250 / 0.07) 40%,
+      rgb(64 110 250 / 0.03) 68%,
+      rgb(64 110 250 / 0) 100%
+    );
+}
+
+/* The same cloud, sized for a phone. Absolute radii keep the glow round, but
+   they do not know how much room they are in: at full size the core is wider
+   than the viewport, so the whole screen sits inside the bright part and the
+   charcoal disappears. */
+@media (max-width: 40rem) {
+  .hero-glow {
+    background-image:
+      radial-gradient(
+        12rem 10.5rem at 56% 24%,
+        rgb(64 110 250 / 0.14) 0%,
+        rgb(64 110 250 / 0.08) 45%,
+        rgb(64 110 250 / 0.03) 72%,
+        rgb(64 110 250 / 0) 100%
+      ),
+      radial-gradient(
+        11rem 10rem at 50% 28%,
+        rgb(64 110 250 / 0.44) 0%,
+        rgb(64 110 250 / 0.34) 22%,
+        rgb(64 110 250 / 0.22) 42%,
+        rgb(64 110 250 / 0.11) 62%,
+        rgb(64 110 250 / 0.04) 80%,
+        rgb(64 110 250 / 0) 100%
+      ),
+      radial-gradient(
+        22rem 19rem at 50% 32%,
+        rgb(64 110 250 / 0.12) 0%,
+        rgb(64 110 250 / 0.07) 40%,
+        rgb(64 110 250 / 0.03) 68%,
+        rgb(64 110 250 / 0) 100%
+      );
+  }
+}
+
+/* ── Nav labels that roll over ─────────────────────────────────────────
+   Two stacked copies of the word inside a one-line window; hovering the link
+   slides both up by exactly that line, so one leaves as the other arrives.
+   Keyed off the anchor rather than a group class because the anchor belongs to
+   fumadocs. The window is what makes it a mechanism rather than a duplicate:
+   without `overflow: hidden` and a fixed one-line height, the second copy is
+   simply the label printed twice, once under the nav. */
+.slide {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  height: 1.25rem;
+  line-height: 1.25rem;
+}
+
+.slide > span {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide > span + span {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 100%;
+}
+
+#nd-nav a:hover .slide > span {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide > span {
+    transition: none;
+  }
+
+  /* Without the transition the swap is a jump between two identical words,
+     which is worse than not moving at all. */
+  #nd-nav a:hover .slide > span {
+    transform: none;
+  }
+}
+
+/* ── Entrance motion ───────────────────────────────────────────────────
+   The resting state of everything here is VISIBLE. Motion runs from a
+   hidden state to the natural one, so markup served without scripting —
+   or with it still loading — reads as a finished page rather than a blank
+   one. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.rise {
+  /* `backwards` holds the from-state through the delay, so a staggered group
+     does not flash into place before its turn. */
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Scroll reveals hide only where an observer exists to bring them back. The
+   `js` class is set by an inline script; without it these are plain content. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.js .reveal[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+
+  .js .reveal,
+  .js .reveal[data-shown] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

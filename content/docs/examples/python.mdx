@@ -1,89 +1,211 @@
 ---
-title: Python — full example
-description: Charge a customer and handle the webhook, end to end.
+title: Python
+description: Collecting, disbursing and handling webhooks, end to end.
 icon: FileCode
 ---
 
-The same integration as the [Node.js example](/docs/examples/nodejs), using Flask.
+A complete Flask integration: both ways to collect, sending money out, and a verified
+webhook.
+
+## Setup
 
 ```python
-import hmac
 import hashlib
+import hmac
 import os
 import time
 
 import requests
-from flask import Flask, request, abort, redirect
+from flask import Flask, jsonify, redirect, request
 
 app = Flask(__name__)
+BASE = "https://connect.tchokopay.com/v1"
 
-TCHOKO_KEY = os.environ["TCHOKOPAY_API_KEY"]
+# Two keys, not one. See /docs/authentication.
+COLLECT_KEY = os.environ["TCHOKOPAY_COLLECT_KEY"]
+DISBURSE_KEY = os.environ["TCHOKOPAY_DISBURSE_KEY"]
 WEBHOOK_SECRET = os.environ["TCHOKOPAY_WEBHOOK_SECRET"]
 
 
-def charge_customer(order_id: str, amount_xaf: int) -> str:
-    response = requests.post(
-        "https://connect.tchokopay.com/v1/payments",
-        headers={
-            "Authorization": f"Bearer {TCHOKO_KEY}",
-            "Idempotency-Key": f"charge-{order_id}",
-        },
-        json={
-            "amount": amount_xaf,
+class TchokoPayError(Exception):
+    def __init__(self, payload):
+        # Branch on `code`, never on the message — the wording can change.
+        self.code = payload.get("code")
+        self.param = payload.get("param")
+        self.request_id = payload.get("requestId")
+        super().__init__(payload.get("message", "Request failed"))
+
+
+def call(path, *, key, method="GET", body=None, idempotency_key=None):
+    headers = {"Authorization": f"Bearer {key}"}
+    if idempotency_key:
+        headers["Idempotency-Key"] = idempotency_key
+
+    res = requests.request(method, f"{BASE}{path}", headers=headers, json=body, timeout=30)
+    data = res.json()
+
+    if not res.ok:
+        raise TchokoPayError(data)
+
+    return data
+```
+
+## Charging a number directly
+
+The customer stays in your app and approves a prompt on their phone.
+
+```python
+def charge_phone(order_id, amount, *, phone, provider, country):
+    return call(
+        "/collect/charge",
+        key=COLLECT_KEY,
+        method="POST",
+        idempotency_key=f"order-{order_id}",
+        body={
+            "amount": amount,
             "currency": "XAF",
+            "country": country,
+            "provider": provider,
+            "phone": phone,
+            "merchantReference": order_id,
             "description": f"Order {order_id}",
-            "reference": order_id,
         },
     )
-    if not response.ok:
-        raise RuntimeError(f"TchokoPay error: {response.json()['message']}")
-
-    return response.json()["checkoutUrl"]  # redirect your customer here
 
 
-def verify_webhook(raw_body: bytes, signature_header: str, timestamp_header: str, secret: str) -> bool:
+@app.post("/pay")
+def pay():
+    payload = request.get_json()
+    try:
+        charge = charge_phone(
+            payload["orderId"],
+            5000,
+            phone=payload["phone"],
+            provider=payload["provider"],  # from GET /v1/account/providers
+            country="CM",
+        )
+    except TchokoPayError as err:
+        if err.code == "INVALID_REQUEST":
+            return jsonify(message=str(err), field=err.param), 400
+        raise
+
+    # Returns immediately. Nobody has paid yet — wait for the webhook.
+    return jsonify(reference=charge["reference"], status=charge["status"])
+```
+
+## Hosted checkout
+
+If you would rather not handle numbers or network selection.
+
+```python
+@app.get("/checkout/<order_id>")
+def checkout(order_id):
+    payment = call(
+        "/collect/checkout",
+        key=COLLECT_KEY,
+        method="POST",
+        idempotency_key=f"order-{order_id}",
+        body={
+            "amount": 5000,
+            "currency": "XAF",
+            "description": f"Order {order_id}",
+            "merchantReference": order_id,
+        },
+    )
+    return redirect(payment["checkoutUrl"])
+```
+
+## Building your network picker
+
+Fetch this once at start-up rather than hardcoding it.
+
+```python
+providers = call("/account/providers", key=COLLECT_KEY)
+# [{"provider": "mtn_cm", "name": "MTN MoMo", "method": "MOBILE_MONEY", "country": "CM"}, ...]
+
+# Show `name` to your customer; send `provider` back to us.
+```
+
+## Sending money out
+
+```python
+def disburse(instruction_id, amount, *, phone, provider, country, name):
+    return call(
+        "/disburse",
+        key=DISBURSE_KEY,
+        method="POST",
+        # Derive this from something stable in your own system. Never random —
+        # a retry must produce the same key, or it becomes a second payment.
+        idempotency_key=f"disburse-{instruction_id}",
+        body={
+            "amount": amount,
+            "currency": "XAF",
+            "country": country,
+            "provider": provider,
+            "phone": phone,
+            "recipientName": name,
+            "merchantReference": instruction_id,
+        },
+    )
+```
+
+## Verifying webhooks
+
+```python
+def verify_webhook(raw_body: bytes, signature: str, timestamp: str, secret: str) -> bool:
+    try:
+        age = abs(time.time() - int(timestamp))
+    except (TypeError, ValueError):
+        return False
+
+    if age > 300:  # stale — reject even if the signature matches
+        return False
+
     expected = hmac.new(
         secret.encode(),
-        f"{timestamp_header}.{raw_body.decode()}".encode(),
+        f"{timestamp}.".encode() + raw_body,
         hashlib.sha256,
     ).hexdigest()
 
-    provided = signature_header.replace("sha256=", "")
-    valid = hmac.compare_digest(expected, provided)
-
-    age = abs(time.time() - float(timestamp_header))
-    if age > 300:
-        return False  # stale — reject even if the signature matches
-
-    return valid
-
-
-@app.get("/checkout/<order_id>")
-def checkout(order_id):
-    checkout_url = charge_customer(order_id, 5000)
-    return redirect(checkout_url)
+    provided = (signature or "").replace("sha256=", "")
+    return hmac.compare_digest(expected, provided)
 
 
 @app.post("/webhooks/tchokopay")
-def tchokopay_webhook():
-    signature = request.headers.get("X-TchokoPay-Signature", "")
-    timestamp = request.headers.get("X-TchokoPay-Timestamp", "")
+def webhook():
+    raw = request.get_data()  # raw bytes, before any parsing
 
-    if not verify_webhook(request.get_data(), signature, timestamp, WEBHOOK_SECRET):
-        abort(400, "invalid signature")
+    if not verify_webhook(
+        raw,
+        request.headers.get("X-TchokoPay-Signature"),
+        request.headers.get("X-TchokoPay-Timestamp"),
+        WEBHOOK_SECRET,
+    ):
+        return "invalid signature", 400
 
+    event_type = request.headers.get("X-TchokoPay-Event")
     event = request.get_json()
 
-    if event["status"] == "SUCCESS":
+    if event_type == "collect.succeeded":
         mark_order_paid(event["invoiceReference"], event["settledAmount"], event["settledCurrency"])
-    elif event["status"] == "FAILED":
+    elif event_type == "collect.failed":
         mark_order_failed(event["invoiceReference"], event.get("failureReason"))
+    elif event_type == "disburse.succeeded":
+        mark_instruction_paid(event["reference"])
+    elif event_type == "disburse.failed":
+        mark_instruction_failed(event["reference"], event.get("statusReason"))
 
+    # Answer 2xx quickly. Do the slow work after.
     return "", 200
 ```
 
 <Callout type="info">
-  `request.get_data()` returns the raw request bytes — don't call `request.get_json()`
-  first and re-serialize it for signature verification, that can reorder keys and break
-  the signature match.
+  Use `request.get_data()`, not `request.get_json()`, for verification — the signature is
+  over the exact bytes that were sent. See
+  [Webhooks](/docs/guides/webhooks#verifying-the-signature).
+</Callout>
+
+<Callout type="warn">
+  If your endpoint sits behind a redirect, register the final URL. We do not follow
+  redirects on webhook delivery, and a redirecting endpoint counts as a failed delivery.
 </Callout>

@@ -1,0 +1,159 @@
+---
+title: Charge a number
+description: POST /v1/collect/charge — push a payment prompt straight to a phone.
+icon: Smartphone
+---
+
+<div className="not-prose flex flex-wrap items-center gap-2">
+  <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
+  <code className="text-sm break-all">/v1/collect/charge</code>
+</div>
+
+Sends a mobile money prompt to a number you name, from your own checkout. No hosted
+page, no redirect — your customer stays where they are and approves on their phone.
+
+<Callout type="info">
+  Use this when you already have the customer's number and want to keep them in your
+  own flow. If you'd rather not handle numbers or network selection at all, use
+  [the hosted checkout](/docs/api-reference/create-checkout) instead — it does the
+  picking for you.
+</Callout>
+
+## Request
+
+<Tabs items={['cURL', 'Node.js', 'Python']}>
+<Tab value="cURL">
+```bash
+curl -X POST https://connect.tchokopay.com/v1/collect/charge \
+  -H "Authorization: Bearer tchoko_live_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-4821-attempt-1" \
+  -d '{
+    "amount": 5000,
+    "currency": "XAF",
+    "country": "CM",
+    "provider": "mtn_cm",
+    "phone": "670000000",
+    "merchantReference": "order_4821",
+    "description": "Order #4821"
+  }'
+```
+</Tab>
+<Tab value="Node.js">
+```js
+const res = await fetch('https://connect.tchokopay.com/v1/collect/charge', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Idempotency-Key': 'order-4821-attempt-1',
+  },
+  body: JSON.stringify({
+    amount: 5000,
+    currency: 'XAF',
+    country: 'CM',
+    provider: 'mtn_cm',
+    phone: '670000000',
+    merchantReference: 'order_4821',
+    description: 'Order #4821',
+  }),
+});
+
+const charge = await res.json();
+```
+</Tab>
+<Tab value="Python">
+```python
+import requests
+
+res = requests.post(
+    "https://connect.tchokopay.com/v1/collect/charge",
+    headers={
+        "Authorization": f"Bearer {API_KEY}",
+        "Idempotency-Key": "order-4821-attempt-1",
+    },
+    json={
+        "amount": 5000,
+        "currency": "XAF",
+        "country": "CM",
+        "provider": "mtn_cm",
+        "phone": "670000000",
+        "merchantReference": "order_4821",
+        "description": "Order #4821",
+    },
+)
+charge = res.json()
+```
+</Tab>
+</Tabs>
+
+### Body
+
+| Field | Type | | Description |
+|---|---|---|---|
+| `amount` | number | required | How much to collect, in `currency`. Must sit inside that currency's bounds — see [limits](/docs/api-reference/limits). |
+| `currency` | string | required | Any currency from [`GET /v1/limits`](/docs/api-reference/limits). |
+| `country` | string | required | ISO country of the number. See [`GET /v1/countries`](/docs/api-reference/countries). |
+| `provider` | string | required | Which network to charge. A code from [`GET /v1/account/providers`](/docs/api-reference/account-providers). |
+| `phone` | string | required | The number to charge, in local format. |
+| `merchantReference` | string | optional | Your own identifier, echoed back everywhere. |
+| `description` | string | optional | Shown to the payer where the network supports it. |
+
+<Callout type="warn">
+  `provider` is required, and we check it against the number. If they disagree, the
+  request is refused before any prompt is sent — so a mistyped number costs you a `400`
+  you can show your customer, not a payment that silently never arrives.
+</Callout>
+
+## Response
+
+```json
+{
+  "reference": "REQ-1788042194995-AB9B94",
+  "status": "PENDING",
+  "amount": 5000,
+  "currency": "XAF",
+  "provider": "mtn_cm",
+  "merchantReference": "order_4821",
+  "createdAt": "2026-08-29T22:23:15.010Z"
+}
+```
+
+`202 Accepted`, and it returns immediately — we do not hold the connection while the
+network thinks about it. **Nobody has paid at this point.** The prompt is on its way to
+the phone.
+
+Watch for the result one of two ways:
+
+- **A webhook** — `collect.succeeded` or `collect.failed`. Recommended; you find out the
+  moment it resolves. See [webhooks](/docs/guides/webhooks).
+- **Polling** [`GET /v1/collect/{reference}`](/docs/api-reference/get-collection). Every
+  few seconds is plenty; the payer has minutes to approve.
+
+## What can come back
+
+The refusals below happen **before** any prompt is sent, so nothing reaches your
+customer and nothing is charged.
+
+| `code` | Why |
+|---|---|
+| `INVALID_REQUEST` | The number isn't one we recognise in that country, doesn't match `provider`, or the amount is outside the currency's bounds. |
+| `FORBIDDEN` | That provider isn't enabled for your account, or this number has been sent too many prompts recently. |
+| `UNAUTHORIZED` | Key missing, invalid, or revoked. |
+
+Once the prompt has gone out, the outcome arrives as a status on the collection rather
+than an error here — see [the status lifecycle](/docs/guides/status-lifecycle).
+
+## Sending the same charge twice
+
+Send an `Idempotency-Key` and a repeat returns the original charge instead of prompting
+your customer again. Strongly recommended — without one, a retry after a network blip
+puts two prompts on your customer's phone for a single order.
+
+## How often you may prompt one number
+
+There is a limit on how many prompts one number can receive in a short window. Exceed it
+and you get a `FORBIDDEN` saying so.
+
+You will not hit this in normal use — it takes retrying the same customer in a loop, which
+an `Idempotency-Key` already prevents.

@@ -5,23 +5,23 @@ icon: ListChecks
 ---
 
 Network calls fail, clients time out, users double-click a submit button. Send an
-`Idempotency-Key` header on `POST /v1/payments` and a retried request with the **same
+`Idempotency-Key` header on `POST /v1/collect/checkout` and a retried request with the **same
 key** always returns the **same payment** — never a duplicate — even if your original
 request's response never made it back to you.
 
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/payments \
+curl -X POST https://connect.tchokopay.com/v1/collect/checkout \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Idempotency-Key: order-4821-attempt-1" \
   -H "Content-Type: application/json" \
-  -d '{ "amount": 5000, "currency": "XAF", "reference": "order_4821" }'
+  -d '{ "amount": 5000, "currency": "XAF", "merchantReference": "order_4821" }'
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
-const res = await fetch('https://connect.tchokopay.com/v1/payments', {
+const res = await fetch('https://connect.tchokopay.com/v1/collect/checkout', {
   method: 'POST',
   headers: {
     Authorization: `Bearer ${process.env.TCHOKOPAY_API_KEY}`,
@@ -35,12 +35,12 @@ const res = await fetch('https://connect.tchokopay.com/v1/payments', {
 <Tab value="Python">
 ```python
 response = requests.post(
-    "https://connect.tchokopay.com/v1/payments",
+    "https://connect.tchokopay.com/v1/collect/checkout",
     headers={
         "Authorization": f"Bearer {api_key}",
         "Idempotency-Key": f"order-{order_id}-attempt-1",
     },
-    json={"amount": 5000, "currency": "XAF", "reference": order_id},
+    json={"amount": 5000, "currency": "XAF", "merchantReference": order_id},
 )
 ```
 </Tab>

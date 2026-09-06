@@ -1,29 +1,26 @@
 'use client';
 
-import { motion, type Variants } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-const container: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-  },
-};
+/**
+ * Reveals that cannot hide the page.
+ *
+ * These were framer-motion components with `initial={{ opacity: 0 }}`, which
+ * React renders into the HTML — so the served markup carried `opacity:0` on
+ * every headline and card, and the whole page was blank until JavaScript
+ * hydrated and animated it back. A screenshot with scripting stalled showed
+ * exactly that: nothing but the footer.
+ *
+ * So the resting state is now visible, always. Entrance motion is a CSS
+ * animation running FROM a hidden state to the element's natural one, which
+ * means no script has to run for the content to be there. Scroll reveals need
+ * an observer, so they are opted into by a `js` class the document only gets
+ * when scripting is available — no script, no hiding.
+ *
+ * `prefers-reduced-motion` is handled in CSS, once, for both.
+ */
 
-const item: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
-};
-
-/** Staggers its direct motion children in on mount — used once per section, not per element. */
-export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.div initial="hidden" animate="show" variants={container} className={className}>
-      {children}
-    </motion.div>
-  );
-}
-
+/** Entrance on load. `delay` is in seconds, to keep call sites readable. */
 export function FadeUp({
   children,
   className,
@@ -34,13 +31,13 @@ export function FadeUp({
   delay?: number;
 }) {
   return (
-    <motion.div variants={item} transition={{ delay }} className={className}>
+    <div className={`rise ${className ?? ''}`} style={{ animationDelay: `${delay}s` }}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-/** Fades a section in as it scrolls into view — for content below the fold. */
+/** Reveals as it scrolls into view, and is simply present if it cannot. */
 export function FadeInView({
   children,
   className,
@@ -50,15 +47,35 @@ export function FadeInView({
   className?: string;
   delay?: number;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Anything already on screen at mount is shown without waiting for a
+    // scroll that may never come — a short page must not sit half-hidden.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay }}
-      className={className}
+    <div
+      ref={ref}
+      data-shown={shown ? '' : undefined}
+      className={`reveal ${className ?? ''}`}
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 ---
 title: Manage webhooks
-description: POST/GET /v1/webhooks — register and check your webhook endpoint.
+description: POST/GET /v1/webhook — register and check your webhook endpoint.
 icon: Webhook
 ---
 
@@ -11,11 +11,11 @@ and how to verify signatures. This page is the endpoint reference.
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">POST</span>
-  <code className="text-sm break-all">/v1/webhooks</code>
+  <code className="text-sm break-all">/v1/webhook</code>
 </div>
 
 ```bash
-curl -X POST https://connect.tchokopay.com/v1/webhooks \
+curl -X POST https://connect.tchokopay.com/v1/webhook \
   -H "Authorization: Bearer tchoko_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "url": "https://mystore.example.com/webhooks/tchokopay" }'
@@ -49,11 +49,11 @@ curl -X POST https://connect.tchokopay.com/v1/webhooks \
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-primary/10 px-2 py-1 text-xs font-mono font-semibold text-fd-primary">GET</span>
-  <code className="text-sm break-all">/v1/webhooks</code>
+  <code className="text-sm break-all">/v1/webhook</code>
 </div>
 
 ```bash
-curl https://connect.tchokopay.com/v1/webhooks \
+curl https://connect.tchokopay.com/v1/webhook \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 

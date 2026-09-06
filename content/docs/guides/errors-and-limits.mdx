@@ -1,23 +1,98 @@
 ---
 title: Errors & rate limits
-description: Every error status you'll see, and how fast you can call the API.
+description: Every error you'll see, how fast you can call, and the field naming rules.
 icon: TriangleAlert
 ---
 
+## Field naming
+
+Three rules the whole API follows, so you never have to check which endpoint
+you're on:
+
+| | |
+|---|---|
+| `reference` | **Always ours.** The identifier we generate — `REQ-…` for a collection, `PO-…` for a disbursement. |
+| `merchantReference` | **Always yours.** Send it under this name, read it back under this name. |
+| `phone` | The mobile money number, whether you're collecting from it or paying it. |
+| `provider` | Which network — `mtn_cm`, `orange_cm`. Same name on every request and response. |
+
+<Callout type="info">
+  `reference` used to be accepted as the name for *your* identifier on requests, and
+  still is. But it meant one thing going out and another coming back, so
+  `merchantReference` is the name to use.
+</Callout>
+
 ## Error format
 
-Every error response has the same shape:
+Every error has the same shape:
 
 ```json
 {
-  "message": "amount has more precision than XAF supports (0 decimal places)",
-  "error": "Bad Request",
-  "statusCode": 400
+  "code": "INSUFFICIENT_BALANCE",
+  "message": "Insufficient balance. You have 100 XAF, this needs 5250 XAF.",
+  "param": "amount",
+  "details": { "currency": "XAF", "available": 100, "required": 5250 },
+  "requestId": "8e281c99-05b6-4fc3-ba79-58c55198b40b"
 }
 ```
 
-`message` is written to be actionable on its own — you shouldn't need to guess what to
-fix.
+| Field | Description |
+|---|---|
+| `code` | **Branch on this.** Stable, and it will not change when somebody rewords a sentence. |
+| `message` | Written to be shown to a person as-is. Never a contract — treat the wording as free to change. |
+| `param` | The field at fault, when the failure is about one. Absent otherwise. |
+| `details` | The numbers behind the message, so you never have to parse the sentence. Present on balance and amount failures. Absent otherwise. |
+| `requestId` | Also returned as the `X-Request-Id` header. Quote it to support and they can find the exact call. |
+
+<Callout type="warn">
+  Never branch on `message`. It is written for humans and gets improved. `code` is the
+  contract.
+</Callout>
+
+### Codes
+
+| `code` | Meaning |
+|---|---|
+| **Access** | |
+| `UNAUTHORIZED` | Key missing, invalid, or revoked. |
+| `MERCHANT_NOT_APPROVED` | Your account is not in a state that can transact. |
+| `INSUFFICIENT_SCOPE` | The key is real but was not issued this scope. Generate one that has it. |
+| `CAPABILITY_DISABLED` | Switched off for everybody, not for you. Nothing to fix on your side. |
+| `PROVIDER_BLOCKED` | Your account is restricted from that network. |
+| **Request** | |
+| `INVALID_REQUEST` | Failed validation. `param` names the field. |
+| `IDEMPOTENCY_KEY_REQUIRED` | Payouts need one. Send a unique `Idempotency-Key`. |
+| `IDEMPOTENCY_KEY_TOO_LONG` | 200 characters or fewer. |
+| **Currency, country, network** | |
+| `UNKNOWN_CURRENCY` | Not a currency we support. See `GET /v1/limits`. |
+| `CURRENCY_MISMATCH` | The currency is not the one that country uses. `details` carries `expected`. |
+| `UNKNOWN_PROVIDER` | Not a provider you can use. See `GET /v1/account/providers`. |
+| `PROVIDER_COUNTRY_MISMATCH` | That network does not operate in that country. |
+| `COUNTRY_NOT_SUPPORTED` | We cannot place mobile numbers there. |
+| `PHONE_NOT_RECOGNISED` | Not a mobile money number we recognise in that country. |
+| `PHONE_PROVIDER_MISMATCH` | A number we can place, but not on the network you named. |
+| **Amount and balance** | |
+| `AMOUNT_TOO_SMALL` | Below the currency minimum. `details.minimum`. |
+| `AMOUNT_TOO_LARGE` | Above the currency maximum. `details.maximum`. |
+| `AMOUNT_PRECISION` | More decimal places than the currency has. |
+| `INSUFFICIENT_BALANCE` | Not enough in that wallet. `details.available` and `details.required`. |
+| `PAYOUT_LIMIT_EXCEEDED` | Past a per-payout, daily or weekly ceiling set on your account. |
+| `PAYOUTS_NOT_CONFIGURED` | Payouts are not enabled for that currency on your account. |
+| **Flow** | |
+| `NOT_FOUND` | No such reference, or it belongs to another account. Identical either way, so you cannot use it to probe. |
+| `RECIPIENT_BUSY` | That number has had enough payment prompts for now. Wait and retry. |
+| `RATE_LIMITED` | Too many requests. See below. |
+| `SERVER_ERROR` | Ours. Retry, and quote the `requestId` if it persists. |
+
+<Callout>
+  A currency is tied to its country. `XOF` with a Cameroonian network is
+  `CURRENCY_MISMATCH`, not a conversion. XAF and XOF are both called the CFA franc and
+  are pegged to the euro at the same rate, but they are different money and each has its
+  own balance.
+</Callout>
+
+Only one error is reported per request — the first thing wrong, so you have one thing to
+fix rather than a list to work through.
 
 ## Status codes
 
@@ -31,25 +106,30 @@ fix.
 
 ## Rate limits
 
-Per API key:
+Every key starts with a default ceiling:
 
 <Cards>
   <Card title="30 requests / minute" description="Short burst window." />
   <Card title="600 requests / hour" description="Sustained volume window." />
 </Cards>
 
-Exceeding either returns `429` with a message telling you which window you hit:
+Exceeding either returns `429`, naming the window and the limit:
 
 ```json
 {
-  "message": "Rate limit exceeded: 30 requests per minute",
-  "error": "Too Many Requests",
-  "statusCode": 429
+  "code": "RATE_LIMITED",
+  "message": "Too many requests in 1 minute (limit 30) — please slow down.",
+  "requestId": "..."
 }
 ```
 
-<Callout type="info">
-  If you're hitting these limits during normal operation, generate a second API key for a
-  separate integration or environment rather than sharing one key across unrelated
-  traffic — limits are scoped per key, not per merchant account.
-</Callout>
+### If the default is too small
+
+It is sized for an ordinary integration — a checkout creating a payment and polling it.
+If you're driving real volume, **the ceiling is raised per key**: talk to us at
+[tech@tchokopay.com](mailto:tech@tchokopay.com) and tell us roughly what throughput you
+expect. A raised limit takes effect immediately, with no key rotation.
+
+Limits are per **key**, not per account. Your server-side integration can be given
+headroom your public checkout key does not need. Two integrations sharing one key share
+one ceiling, so give each its own.

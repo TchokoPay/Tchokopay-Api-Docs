@@ -1,13 +1,13 @@
 ---
-title: Payout status
-description: GET /v1/payouts/:reference — check whether a payout landed.
+title: Get a disbursement
+description: GET /v1/disburse/{reference} — check whether a disbursement landed.
 icon: Search
 ---
 
 <div className="not-prose flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono font-semibold">GET</span>
-  <code className="text-sm break-all">/v1/payouts/:reference</code>
-  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Send payouts</span>
+  <code className="text-sm break-all">/v1/disburse/:reference</code>
+  <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Disburse</span>
 </div>
 
 Returns the current state of one of your payouts. Scoped to your own account — another
@@ -19,25 +19,25 @@ reference exists.
 <Tabs items={['cURL', 'Node.js', 'Python']}>
 <Tab value="cURL">
 ```bash
-curl https://connect.tchokopay.com/v1/payouts/PO-1787962449863-7B361B \
+curl https://connect.tchokopay.com/v1/disburse/PO-1787962449863-7B361B \
   -H "Authorization: Bearer tchoko_live_..."
 ```
 </Tab>
 <Tab value="Node.js">
 ```js
 const res = await fetch(
-  `https://connect.tchokopay.com/v1/payouts/${reference}`,
+  `https://connect.tchokopay.com/v1/disburse/${reference}`,
   { headers: { Authorization: `Bearer ${process.env.TCHOKOPAY_PAYOUT_KEY}` } },
 );
 
-const payout = await res.json();
+const disbursement = await res.json();
 ```
 </Tab>
 <Tab value="Python">
 ```python
 response = requests.get(
-    f"https://connect.tchokopay.com/v1/payouts/{reference}",
-    headers={"Authorization": f"Bearer {payout_key}"},
+    f"https://connect.tchokopay.com/v1/disburse/{reference}",
+    headers={"Authorization": f"Bearer {disburse_key}"},
 )
 payout = response.json()
 ```
@@ -54,7 +54,7 @@ payout = response.json()
   "status": "SENT",
   "amount": 25000,
   "currency": "XAF",
-  "recipientPhone": "670000000",
+  "phone": "670000000",
   "recipientName": "Amina Njoya",
   "merchantReference": "payout_4417",
   "providerReference": "MMH17797898332",
@@ -75,18 +75,17 @@ payout = response.json()
 | `REJECTED` | Declined during review. | Back in your balance |
 
 <Callout>
-**`SENT` is deliberately not `PAID`.** Mobile money networks confirm asynchronously, so
-the network accepting a payout and the recipient receiving it are different events —
-sometimes minutes apart. We don't collapse them, because your code will branch on this.
+**`SENT` is not `PAID`.** The network accepting a disbursement and the recipient
+receiving it are two different events, sometimes minutes apart. Treat `SENT` as in
+flight; wait for `PAID` before telling anyone the money arrived.
 </Callout>
 
 <Callout type="warn">
-A `FAILED` payout **keeps your money reserved**. It does not go back automatically.
+A `FAILED` disbursement **keeps your money reserved** — it is not returned automatically.
 
-That's deliberate: when a dispatch fails we often can't tell whether the network took the
-money or not, and returning funds we may already have sent is the one mistake with no way
-back. TchokoPay retries it or returns it explicitly, and you'll get a `payout.failed`
-webhook either way.
+We confirm with the network whether the money actually moved before releasing it, and
+then either complete it or return it to your balance. You get a `disburse.failed` webhook
+either way. Do not re-send a failed disbursement yourself; contact us instead.
 </Callout>
 
 ## Errors
@@ -94,5 +93,5 @@ webhook either way.
 | Status | Meaning |
 |---|---|
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Your key doesn't have the **Send payouts** permission. |
+| `403` | Your key doesn't have the **Disburse** permission. |
 | `404` | No payout with that reference on your account. |
