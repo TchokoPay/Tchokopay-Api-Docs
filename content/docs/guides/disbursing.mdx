@@ -44,10 +44,15 @@ and never widened afterwards. See [Scopes](/docs/authentication).
 <Step>
 ### The amount must fit your payout limits
 
-A per-payout ceiling, a rolling daily ceiling, and a rolling weekly one, set on your
-account. Check what is left with
-[`GET /v1/account/disburse-limits/:currency`](/docs/api-reference/disburse-limits) — high-volume
-accounts get ceilings to match their volume.
+A per-payout ceiling, and optionally a rolling daily and weekly one. The per-payout
+ceiling is the currency's own maximum — the same one that bounds a collection — so
+there's nothing to set up before your first payout. Daily and weekly ceilings exist only
+where support has agreed them with you.
+
+Check what is left with
+[`GET /v1/account/disburse-limits/:currency`](/docs/api-reference/disburse-limits), and
+read `enabled` rather than the status code. High-volume accounts get ceilings to match
+their volume.
 </Step>
 <Step>
 ### You must actually have the money
@@ -98,7 +103,7 @@ You'll get a `disburse.failed` webhook, and the disbursement will show why in `s
 async function sendPayout(instruction) {
   // Fail early rather than half way through a batch.
   const limits = await get('/v1/account/disburse-limits/XAF');
-  if (!limits.configured) throw new Error('Payouts not enabled on this account');
+  if (!limits.enabled) throw new Error(limits.message);
   if (limits.remainingToday !== null && limits.remainingToday < instruction.amount) {
     throw new Error('Would exceed the daily payout limit');
   }
@@ -109,14 +114,14 @@ async function sendPayout(instruction) {
     phone: instruction.phone,
     recipientName: instruction.recipientName,
     // Your own id, so you can reconcile without storing ours.
-    reference: instruction.id,
+    merchantReference: instruction.id,
   }, {
     // Derived from your id, not random per attempt — a retry has to produce
     // the same key or it is not a retry.
     'Idempotency-Key': `payout-${instruction.id}`,
   });
 
-  if (disburse.sentReview) {
+  if (payout.awaitingReview) {
     // Funded and queued, but a person has to release it. Do not retry —
     // the same key returns this same payout.
     await markAwaitingApproval(instruction.id, payout.reference);

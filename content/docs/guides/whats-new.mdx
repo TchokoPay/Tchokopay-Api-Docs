@@ -43,6 +43,31 @@ in an email:
 - [`/v1/limits`](/docs/api-reference/limits) — amount bounds per currency
 - [`/v1/account/providers`](/docs/api-reference/account-providers) — what **your** account may use
 
+## Disburse limits answer one question
+
+[`GET /v1/account/disburse-limits/{currency}`](/docs/api-reference/disburse-limits) now
+returns **`enabled`** — true only when a payout would actually be accepted.
+
+It always answered `200 OK`, including when payouts were switched off, and the only hint
+was `configured`, which described whether an admin had set you a ceiling and said nothing
+about whether the capability was on. An integration that checked the status code, or
+checked `configured`, could read a green light while payouts were off platform-wide.
+
+```diff
+- if (!limits.configured) throw new Error('Payouts not enabled');
++ if (!limits.enabled) throw new Error(limits.message);
+```
+
+`configured` still returns and still means what it meant, so nothing breaks. Alongside
+`enabled` you now get `platformEnabled`, `blockedBy` (`PLATFORM`, `ACCOUNT_DISABLED`,
+`CURRENCY_CLOSED`, or `null`) and a `message` you can show a person.
+
+<Callout type="info">
+  **You don't need a payout limit provisioned.** Your per-payout ceiling is the
+  currency's own maximum — the same one that bounds a collection — unless support has
+  agreed a different one with you. There is nothing to request before your first payout.
+</Callout>
+
 ## Errors have a shape now
 
 Previously an error carried `message`, `error` and `statusCode`, and validation failures

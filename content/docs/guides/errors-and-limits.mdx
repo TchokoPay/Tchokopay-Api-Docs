@@ -76,13 +76,22 @@ Every error has the same shape:
 | `AMOUNT_TOO_LARGE` | Above the currency maximum. `details.maximum`. |
 | `AMOUNT_PRECISION` | More decimal places than the currency has. |
 | `INSUFFICIENT_BALANCE` | Not enough in that wallet. `details.available` and `details.required`. |
-| `PAYOUT_LIMIT_EXCEEDED` | Past a per-payout, daily or weekly ceiling set on your account. |
-| `PAYOUTS_NOT_CONFIGURED` | Payouts are not enabled for that currency on your account. |
+| `PAYOUT_LIMIT_EXCEEDED` | Past a per-payout, daily or weekly ceiling. `details` carries the ceiling. |
+| `PAYOUTS_NOT_CONFIGURED` | Payouts are stopped for that currency — either on your account, or because the currency isn't open at all. Call [disburse-limits](/docs/api-reference/disburse-limits) and read `blockedBy` to see which. Not something you can cause with a bad request. |
 | **Flow** | |
 | `NOT_FOUND` | No such reference, or it belongs to another account. Identical either way, so you cannot use it to probe. |
 | `RECIPIENT_BUSY` | That number has had enough payment prompts for now. Wait and retry. |
 | `RATE_LIMITED` | Too many requests. See below. |
 | `SERVER_ERROR` | Ours. Retry, and quote the `requestId` if it persists. |
+
+<Callout type="warn">
+  **`CAPABILITY_DISABLED` and `PAYOUTS_NOT_CONFIGURED` are not your bug.** Neither is
+  caused by anything in your request, and neither goes away on retry. Both mean a switch
+  is off on our side. Check
+  [`GET /v1/account/disburse-limits/{currency}`](/docs/api-reference/disburse-limits) —
+  its `enabled` field is the single answer to "can I disburse right now", and `blockedBy`
+  names what to ask support for.
+</Callout>
 
 <Callout>
   A currency is tied to its country. `XOF` with a Cameroonian network is
@@ -100,7 +109,7 @@ fix rather than a list to work through.
 |---|---|
 | `400` | Validation error — bad amount, unknown currency, more decimal precision than the currency supports, `Idempotency-Key` too long, malformed webhook URL. |
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Your merchant account isn't approved, or the merchant API is temporarily disabled platform-wide. |
+| `403` | Your merchant account isn't approved, your key lacks the scope, or the capability is switched off platform-wide. `code` says which. |
 | `404` | The payment reference doesn't exist, or belongs to a different merchant account — both look identical, so you can't use this endpoint to probe whether a reference exists. |
 | `429` | Rate limit hit — see below. |
 

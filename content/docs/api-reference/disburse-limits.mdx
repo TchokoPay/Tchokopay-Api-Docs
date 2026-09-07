@@ -10,8 +10,15 @@ icon: Gauge
   <span className="rounded-md bg-fd-muted px-2 py-1 text-xs font-mono">Disburse</span>
 </div>
 
-What you're allowed to send in a currency, and how much of that allowance you've already
-used. Check it before a batch so you fail early rather than half way through.
+Whether you can disburse in a currency at all, what you're allowed to send, and how much
+of that allowance you've already used. Check it before a batch so you fail early rather
+than half way through.
+
+<Callout type="warn">
+**Check `enabled`, not the status code.** This endpoint answers `200 OK` whether or not
+you can pay out — "no, and here's why" is a successful answer to a question about your
+limits. `enabled` is the only field that tells you a payout would be accepted.
+</Callout>
 
 ## Request
 
@@ -29,7 +36,7 @@ const res = await fetch('https://connect.tchokopay.com/v1/account/disburse-limit
 });
 
 const limits = await res.json();
-if (!limits.configured) throw new Error('Payouts not enabled for this account yet');
+if (!limits.enabled) throw new Error(limits.message);
 ```
 </Tab>
 <Tab value="Python">
@@ -50,7 +57,11 @@ limits = response.json()
 ```json
 {
   "currency": "XAF",
+  "enabled": true,
+  "platformEnabled": true,
   "configured": true,
+  "blockedBy": null,
+  "message": null,
   "perTransaction": 100000,
   "perDay": 500000,
   "perWeek": null,
@@ -64,18 +75,37 @@ limits = response.json()
 
 | Field | Description |
 |---|---|
-| `configured` | `false` means no limit is set and you **cannot pay out** in this currency yet. |
+| `enabled` | **Read this one.** `true` only when a payout would actually be accepted. It is `platformEnabled && configured`. |
+| `platformEnabled` | Payouts are switched on across TchokoPay. Nothing you can change — contact support. |
+| `configured` | The currency's ceilings resolve for your account. Same meaning as `enabled` minus the platform switch — kept for older integrations. |
+| `blockedBy` | `"PLATFORM"`, `"ACCOUNT_DISABLED"`, `"CURRENCY_CLOSED"`, or `null` when nothing is blocking. See below. |
+| `message` | Plain-language reason, or `null` when `enabled` is `true`. Safe to show a human. |
 | `perTransaction` | The largest single payout allowed. `null` means no per-payout ceiling. |
 | `perDay` / `perWeek` | Rolling 24-hour and 7-day ceilings. `null` means no ceiling of that kind. |
 | `reviewThreshold` | Anything above this waits for a person instead of going out immediately. `null` means nothing is held. |
 | `spentToday` / `spentThisWeek` | What you've already committed in each window. |
 | `remainingToday` / `remainingThisWeek` | What's left. `null` where there's no ceiling. |
 
-<Callout>
-**No limit means no payouts.** A merchant with no configured limit can't send anything —
-that's the safe default for a capability that moves real money. Contact support to have
-yours set.
-</Callout>
+The limit fields (`perTransaction` onwards) are present only when `enabled` is `true`.
+
+## You don't need a limit set up
+
+The ceilings come from the currency itself. Every currency we support has a maximum, and
+that maximum is your per-payout ceiling unless support has agreed a different one with
+you — it's the same ceiling that bounds a collection in that currency, so one number
+governs money moving in either direction.
+
+Nothing has to be provisioned on your account before you can disburse. `perDay` and
+`perWeek` are `null` for most accounts, and `null` means no ceiling of that kind rather
+than a ceiling of zero.
+
+`blockedBy` names the exception when there is one:
+
+| Value | Meaning |
+|---|---|
+| `PLATFORM` | Payouts are off across TchokoPay. Affects everyone. |
+| `ACCOUNT_DISABLED` | Support has stopped payouts on your account for this currency. |
+| `CURRENCY_CLOSED` | This currency isn't open for movement at all — collections included. |
 
 ## What counts as spent
 

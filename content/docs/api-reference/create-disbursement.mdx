@@ -148,7 +148,7 @@ recalled. Send the same key again and you get the same payout back, never a seco
 |---|---|
 | `400` | No `Idempotency-Key`, unknown currency, non-positive amount, or **not enough balance** — the message tells you what you have and what was needed. Also returned when payouts aren't enabled on the platform. |
 | `401` | Missing, invalid, or revoked API key. |
-| `403` | Your key doesn't have the **Disburse** permission, no payout limit is configured for that currency, or the amount is over one of your limits. The message says which. |
+| `403` | Your key doesn't have the **Disburse** permission, payouts are off for the platform or your account, or the amount is over one of your limits. The message says which. |
 | `429` | Rate limit hit — see [Errors & rate limits](/docs/guides/errors-and-limits). |
 
 ## What happens next
