@@ -31,6 +31,36 @@
 .dark {
   --color-fd-primary: oklch(0.68 0.19 262);
   --color-fd-primary-foreground: oklch(0.15 0.02 262);
+  /* Primary charcoal black — #0A0C10. Site-wide dark-mode background,
+     including the API reference/docs pages themselves — not just the
+     marketing landing page's own override below, which stays committed-dark
+     regardless of theme and would otherwise be the only place this showed. */
+  --color-fd-background: #0A0C10;
+  /* Every surface below is the same hue/saturation family as the
+     background (220°, 23%), just a step up in lightness each time — one
+     consistent charcoal scale instead of Fumadocs' own neutral (0%
+     saturation) grays sitting mismatched on top of a blue-black page.
+     Text/foreground tokens are untouched: they're already light enough
+     to read fine regardless of the surface hue underneath them. */
+  --color-fd-card: #101319;
+  --color-fd-popover: #14181F;
+  --color-fd-muted: #181C26;
+  /* Secondary surface (chips, secondary buttons, subtle panels). */
+  --color-fd-secondary: #161A23;
+  --color-fd-border: hsla(220, 20%, 55%, 18%);
+  --color-fd-accent: hsla(220, 20%, 55%, 25%);
+  --color-fd-ring: hsl(220, 15%, 55%);
+}
+
+/* The sidebar carries its own, more-specific override (from
+   fumadocs-ui/css/neutral.css's `.dark #nd-sidebar` rule, which beats a
+   plain `.dark` rule on specificity) — still Fumadocs' neutral gray, so it
+   needs its own fix rather than inheriting the one above. Lighter than the
+   main surfaces (same lift neutral.css itself used, just recoloured) so the
+   sidebar still reads as a distinct panel against the page. */
+.dark #nd-sidebar {
+  --color-fd-muted: #1D232F;
+  --color-fd-secondary: #212835;
 }
 
 body {
@@ -74,7 +104,7 @@ body {
    Scoped to `#nd-home-layout`, which fumadocs puts on the marketing layout
    only, so the docs keep their own light/dark behaviour. */
 #nd-home-layout {
-  --color-fd-background: #0d0e11;
+  --color-fd-background: #0A0C10;
   --color-fd-foreground: #f2f4f8;
   --color-fd-muted-foreground: #99a1b3;
   --color-fd-primary: #7fa5ff;
