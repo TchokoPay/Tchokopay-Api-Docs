@@ -32,6 +32,8 @@ export const metadata: Metadata = {
   description:
     'Take mobile money payments and send them back out, from your own backend. Two verbs — collect and disburse — with signed webhooks and idempotent requests.',
   metadataBase: new URL('https://docs.tchokopay.com'),
+  // Each page names itself as the one canonical address (relative to its own path).
+  alternates: { canonical: './' },
   icons: {
     icon: '/favicon.png',
   },
