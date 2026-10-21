@@ -71,6 +71,7 @@ Every error has the same shape:
 | `COUNTRY_NOT_SUPPORTED` | We cannot place mobile numbers there. |
 | `PHONE_NOT_RECOGNISED` | Not a mobile money number we recognise in that country. |
 | `PHONE_PROVIDER_MISMATCH` | A number we can place, but not on the network you named. |
+| `PROVIDER_DIRECTION_NOT_SUPPORTED` | That network is real and open on your account, but not for this direction — e.g. a provider that only collects, called on a disbursement. See [`GET /v1/providers`](/docs/api-reference/providers) for which providers support which direction. |
 | **Amount and balance** | |
 | `AMOUNT_TOO_SMALL` | Below the currency minimum. `details.minimum`. |
 | `AMOUNT_TOO_LARGE` | Above the currency maximum. `details.maximum`. |

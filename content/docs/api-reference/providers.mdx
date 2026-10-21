@@ -18,8 +18,9 @@ curl https://connect.tchokopay.com/v1/providers \
 
 ```json
 [
-  { "provider": "mtn_cm",    "name": "MTN MoMo",     "method": "MOBILE_MONEY", "country": "CM" },
-  { "provider": "orange_cm", "name": "Orange Money", "method": "MOBILE_MONEY", "country": "CM" }
+  { "provider": "mtn_cm",    "name": "MTN MoMo",     "method": "MOBILE_MONEY", "country": "CM", "supportsPayin": true, "supportsPayout": true },
+  { "provider": "orange_cm", "name": "Orange Money", "method": "MOBILE_MONEY", "country": "CM", "supportsPayin": true, "supportsPayout": true },
+  { "provider": "bank_gh",   "name": "Bank Transfer", "method": "BANK",         "country": "GH", "supportsPayin": false, "supportsPayout": true }
 ]
 ```
 
@@ -29,6 +30,16 @@ curl https://connect.tchokopay.com/v1/providers \
 | `name` | What the network calls itself. Show this to your customer, not the code. |
 | `method` | The class — `MOBILE_MONEY` for every network on it. It cannot tell two networks apart; `provider` is the field that can. |
 | `country` | `null` for a borderless provider. |
+| `supportsPayin` | Can you collect through this provider right now. |
+| `supportsPayout` | Can you disburse through this provider right now. Not guaranteed to match `supportsPayin` — see below. |
+
+<Callout type="warn">
+  Some providers are one-directional. `bank_gh` above disburses to a Ghanaian bank
+  account but does not collect; another provider might collect and not disburse. Call this with the direction you need in mind, not just the country and
+  method — a `POST` against a provider that doesn't support that direction returns
+  `PROVIDER_DIRECTION_NOT_SUPPORTED`, not a silent failure. See
+  [errors](/docs/guides/errors-and-limits#codes).
+</Callout>
 
 <Callout type="warn">
   This is the catalogue — what the **platform** supports. What **your account** may use

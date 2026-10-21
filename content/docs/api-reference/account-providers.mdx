@@ -38,6 +38,13 @@ curl https://connect.tchokopay.com/v1/account/providers \
 | `reason` | Kept for forward compatibility — currently always `null`. |
 
 <Callout type="info">
+  This endpoint is scoped to **collection**: every channel listed here already accepts
+  payin. It won't list a provider that only disburses — for the full catalogue including
+  one-directional providers, with explicit `supportsPayin`/`supportsPayout` flags, use
+  [`GET /v1/providers`](/docs/api-reference/providers) instead.
+</Callout>
+
+<Callout type="info">
   This reflects what's open platform-wide, not something specific to your account —
   every approved merchant sees the same list.
 </Callout>

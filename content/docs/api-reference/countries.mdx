@@ -27,7 +27,9 @@ curl https://connect.tchokopay.com/v1/countries \
     "currency": "XAF",
     "dialCode": "+237",
     "phoneDigits": 9,
-    "phoneExample": "670000000"
+    "phoneExample": "670000000",
+    "supportsPayin": true,
+    "supportsPayout": true
   }
 ]
 ```
@@ -39,6 +41,14 @@ curl https://connect.tchokopay.com/v1/countries \
 | `dialCode` | International dialling prefix. |
 | `phoneDigits` | How many digits a local number has. Validate against this before calling us. |
 | `phoneExample` | A correctly shaped number, for your own tests and placeholder text. |
+| `supportsPayin` | Can you collect from this country right now. `true` if at least one of its networks can. |
+| `supportsPayout` | Can you disburse to this country right now. Checked separately from `supportsPayin` — a country can take one direction and not the other. |
+
+<Callout type="warn">
+  Collection and disbursement are not guaranteed to match. A country can appear here with
+  `supportsPayin: true` and `supportsPayout: false`, or the other way round — check the
+  direction you actually need rather than assuming a listed country supports both.
+</Callout>
 
 <Callout type="info">
   `phoneDigits` and `phoneExample` are absent for some countries. Where they are missing,
